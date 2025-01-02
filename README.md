@@ -1,6 +1,7 @@
 # SolTrack
 
-**SolTrack** is a lightweight Flask-based web application for tracking Solana wallet balances and calculating daily, weekly, and monthly profit and loss (PnL) statistics. It provides a simple and elegant web interface to monitor wallet activity in real-time.
+**SolTrack** is a lightweight Flask-based web application for tracking Solana wallet balances and calculating daily, weekly, and monthly profit and loss (PnL) statistics. 
+It provides a simple and elegant web interface to monitor wallet activity in real-time.
 
 ---
 
@@ -87,5 +88,3 @@ http://127.0.0.1:5000/?wallet=YOUR_WALLET_ADDRESS&show_week_pnl=true&show_month_
 ## License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-
----

@@ -1,4 +1,4 @@
-import requests, threading, time
+import requests, threading, time, base58
 
 from flask import Flask, request, render_template_string
 from datetime import datetime, timedelta
@@ -7,17 +7,9 @@ app = Flask(__name__)
 
 # Base Configuration
 SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"  # Solana mainnet RPC URL
-STARTING_BALANCE = 0.0  # Starting balance in SOL
 MIN_PNL_VALUE = 0.0001  # Minimum PnL value (Skipping fee balance changes)
 
-LATEST_DATA = {
-    "wallet_address": "",
-    "current_balance": 0.0,
-    "starting_balance": 0.0,
-    "pnl": 0.0,
-    "week_pnl": 0.0,
-    "month_pnl": 0.0
-}
+user_data = {}  # Global dictionary to store user data keyed by wallet address
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -64,10 +56,10 @@ HTML_TEMPLATE = """
             margin-left: 0.8rem;
         }
         .pnl-positive {
-            color: #00ff00;
+            color: #00c853;
         }
         .pnl-negative {
-            color: #ff0000;
+            color: #d50000;
         }
         .pnl-neutral {
             color: #ffffff;
@@ -111,70 +103,77 @@ def get_sol_balance(wallet_address):
     Fetches the SOL balance for a specific wallet address
     Queries the Solana RPC endpoint and converts the balance from lamports to SOL
     """
-    # Fetch SOL balance
-    payload_balance = {
-        "jsonrpc": "2.0",
-        "id": 1,
-        "method": "getBalance",
-        "params": [wallet_address]
-    }
-    response_balance = requests.post(SOLANA_RPC_URL, json=payload_balance)
-    result_balance = response_balance.json()
-
     try:
+        # Fetch SOL balance
+        payload_balance = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "getBalance",
+            "params": [wallet_address]
+        }
+        response_balance = requests.post(SOLANA_RPC_URL, json=payload_balance)
+        result_balance = response_balance.json()
+
         return result_balance['result']['value'] / 1e9 # Convert lamports to SOL
-    except KeyError:
-        return None, []
+    except (requests.RequestException, KeyError):
+        return 0.0  # Return 0 balance on error
 
 def update_wallet_data():
     """
-    Periodically updates the wallet data, including balance and profit and loss (PnL)
+    Periodically updates wallet data in the global user_data dictionary, including balance and profit and loss (PnL)
     !! Runs in a separate thread to continuously refresh wallet information
     """
-    global STARTING_BALANCE, LATEST_DATA
     while True:
-        wallet_address = LATEST_DATA.get("wallet_address")
-        if wallet_address: # Check if a wallet address is set
+        for wallet_address in list(user_data.keys()): # Check if a wallet address is set
             current_balance = get_sol_balance(wallet_address)
             if current_balance is not None:
                 today_date = datetime.now().date()
-                start_of_week = today_date - timedelta(days=today_date.weekday())
-                start_of_month = today_date.replace(day=1)
+                data = user_data[wallet_address]
 
-                # Reset the starting balance if it's a new day
-                if LATEST_DATA.get("starting_date") != today_date:
-                    STARTING_BALANCE = current_balance
-                    LATEST_DATA["starting_date"] = today_date
-                    
-                pnl = round(current_balance - STARTING_BALANCE, 2)
+                # Daily PnL
+                if data.get('starting_date') != today_date:
+                    data['starting_balance'] = current_balance
+                    data['starting_date'] = today_date
+
+                pnl = round(current_balance - data['starting_balance'], 2)
                 if abs(pnl) < MIN_PNL_VALUE:
                     pnl = 0.0
-                
-                # Calculate weekly PnL
-                if LATEST_DATA.get("week_start_date") != start_of_week:
-                    LATEST_DATA["week_start_balance"] = current_balance
-                    LATEST_DATA["week_start_date"] = start_of_week
-                week_pnl = round(current_balance - LATEST_DATA["week_start_balance"], 2)
+
+                # Weekly PnL
+                start_of_week = today_date - timedelta(days=today_date.weekday())
+                if data.get('week_start_date') != start_of_week:
+                    data['week_start_balance'] = current_balance
+                    data['week_start_date'] = start_of_week
+
+                week_pnl = round(current_balance - data['week_start_balance'], 2)
                 if abs(week_pnl) < MIN_PNL_VALUE:
                     week_pnl = 0.0
 
-                # Calculate monthly PnL
-                if LATEST_DATA.get("month_start_date") != start_of_month:
-                    LATEST_DATA["month_start_balance"] = current_balance
-                    LATEST_DATA["month_start_date"] = start_of_month
-                month_pnl = round(current_balance - LATEST_DATA["month_start_balance"], 2)
+                # Monthly PnL
+                start_of_month = today_date.replace(day=1)
+                if data.get('month_start_date') != start_of_month:
+                    data['month_start_balance'] = current_balance
+                    data['month_start_date'] = start_of_month
+
+                month_pnl = round(current_balance - data['month_start_balance'], 2)
                 if abs(month_pnl) < MIN_PNL_VALUE:
                     month_pnl = 0.0
 
-                # Update global data with latest values
-                LATEST_DATA.update({
-                    "current_balance": round(current_balance, 2),
-                    "starting_balance": round(STARTING_BALANCE, 2),
-                    "pnl": pnl,
-                    "week_pnl": week_pnl,
-                    "month_pnl": month_pnl
+                # Update global data
+                data.update({
+                    'current_balance': round(current_balance, 2),
+                    'pnl': pnl,
+                    'week_pnl': week_pnl,
+                    'month_pnl': month_pnl,
                 })
-        time.sleep(5) # Wait 5 seconds before next update
+
+        time.sleep(5)  # Wait 5 seconds before the next update
+
+def is_valid_solana_address(address):
+    try:
+        return len(address) == 44 and base58.b58decode(address)
+    except Exception:
+        return False
 
 @app.route('/')
 def track_wallet():
@@ -189,12 +188,25 @@ def track_wallet():
     if not wallet_address:
         return "Please provide a wallet address as a 'wallet' URL parameter..."
 
-    global LATEST_DATA
-    if LATEST_DATA["wallet_address"] != wallet_address:
-        LATEST_DATA["wallet_address"] = wallet_address
-        STARTING_BALANCE = 0.0  # Reset starting balance when wallet changes
+    if not is_valid_solana_address(wallet_address):
+        return "Invalid wallet address provided"
 
-    return render_template_string(HTML_TEMPLATE, show_week_pnl=show_week_pnl, show_month_pnl=show_month_pnl, **LATEST_DATA)
+    # Initialize user data if not present
+    if wallet_address not in user_data:
+        user_data[wallet_address] = {
+            'starting_balance': 0,
+            'starting_date': None,
+            'week_start_balance': 0,
+            'week_start_date': None,
+            'month_start_balance': 0,
+            'month_start_date': None,
+            'current_balance': 0,
+            'pnl': 0,
+            'week_pnl': 0,
+            'month_pnl': 0,
+        }
+
+    return render_template_string(HTML_TEMPLATE, show_week_pnl=show_week_pnl, show_month_pnl=show_month_pnl, **user_data[wallet_address])
 
 if __name__ == "__main__":
     threading.Thread(target=update_wallet_data, daemon=True).start() # Start the background thread for updating wallet data
