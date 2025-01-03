@@ -21,7 +21,7 @@ HTML_TEMPLATE = """
     <style>
         body {
             font-family: monaco, Consolas, Lucida Console, monospace;
-            background-color: rgba(33, 33, 33, 0.9);
+            background-color: #282c34;
             color: #ffffff;
             text-align: center;
         }
@@ -29,6 +29,37 @@ HTML_TEMPLATE = """
             display: flex;
             justify-content: center;
             align-items: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .number-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        /* Styles for small screens (e.g., smartphones) */
+        @media screen and (max-width: 600px) {
+            .number-box {
+                width: 80vw;
+            }
+        }
+        /* Styles for medium screens (e.g., tablets) */
+        @media screen and (min-width: 601px) and (max-width: 991px) {
+            .number-box {
+                width: 70vw;
+            }
+        }
+        /* Styles for large screens (e.g., desktops) */
+        @media screen and (min-width: 992px) {
+            .number-box {
+                width: 60vw;
+            }
         }
         .balance, .pnl {
             font-size: 3.6rem;
@@ -37,7 +68,9 @@ HTML_TEMPLATE = """
         }
         .balance-title, .pnl-title {
             font-size: 1.2rem;
+            text-transform: uppercase;
             color: #b0b0b0;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
             margin-bottom: 0.8rem;
         }
         .balance-value, .pnl-value {
@@ -46,9 +79,11 @@ HTML_TEMPLATE = """
             align-items: center;
             font-size: 2.4rem;
             font-weight: bold;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
         }
         .balance-value > img, .pnl-value > img {
             margin-left: 0.8rem;
+            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
         }
         .pnl-positive {
             color: #00c853;
@@ -68,33 +103,33 @@ HTML_TEMPLATE = """
 </head>
 <body>
     <div id="wallet-container" class="container">
-        <div class="balance">
-            <div class="balance-title">BALANCE</div>
-            <div id="current-balance" class="balance-value">{{ current_balance }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
+        <div class="number-box">
+            <div class="balance">
+                <div class="balance-title">BALANCE</div>
+                <div id="current-balance" class="balance-value">{{ current_balance }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
+            </div>
+            <div id="today-pnl" class="pnl {% if pnl > 0 %}pnl-positive{% elif pnl < 0 %}pnl-negative{% else %}pnl-neutral{% endif %}">
+                <div class="pnl-title">TODAY PNL</div>
+                <div id="pnl-value" class="pnl-value">{{ "+" if pnl > 0 else "" }}{{ pnl }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
+            </div>
+            {% if show_week_pnl %}
+            <div id="weekly-pnl" class="pnl {% if week_pnl > 0 %}pnl-positive{% elif week_pnl < 0 %}pnl-negative{% else %}pnl-neutral{% endif %}">
+                <div class="pnl-title">WEEKLY PNL</div>
+                <div id="week-pnl-value" class="pnl-value">{{ "+" if week_pnl > 0 else "" }}{{ week_pnl }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
+            </div>
+            {% endif %}
+            {% if show_month_pnl %}
+            <div id="monthly-pnl" class="pnl {% if month_pnl > 0 %}pnl-positive{% elif month_pnl < 0 %}pnl-negative{% else %}pnl-neutral{% endif %}">
+                <div class="pnl-title">MONTHLY PNL</div>
+                <div id="month-pnl-value" class="pnl-value">{{ "+" if month_pnl > 0 else "" }}{{ month_pnl }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
+            </div>
+            {% endif %}
         </div>
-        <div id="today-pnl" class="pnl {% if pnl > 0 %}pnl-positive{% elif pnl < 0 %}pnl-negative{% else %}pnl-neutral{% endif %}">
-            <div class="pnl-title">TODAY PNL</div>
-            <div id="pnl-value" class="pnl-value">{{ "+" if pnl > 0 else "" }}{{ pnl }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
-        </div>
-        {% if show_week_pnl %}
-        <div id="weekly-pnl" class="pnl {% if week_pnl > 0 %}pnl-positive{% elif week_pnl < 0 %}pnl-negative{% else %}pnl-neutral{% endif %}">
-            <div class="pnl-title">WEEKLY PNL</div>
-            <div id="week-pnl-value" class="pnl-value">{{ "+" if week_pnl > 0 else "" }}{{ week_pnl }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
-        </div>
-        {% endif %}
-        {% if show_month_pnl %}
-        <div id="monthly-pnl" class="pnl {% if month_pnl > 0 %}pnl-positive{% elif month_pnl < 0 %}pnl-negative{% else %}pnl-neutral{% endif %}">
-            <div class="pnl-title">MONTHLY PNL</div>
-            <div id="month-pnl-value" class="pnl-value">{{ "+" if month_pnl > 0 else "" }}{{ month_pnl }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
-        </div>
-        {% endif %}
     </div>
     <script>
-    function updateWalletData() {
-        const walletAddress = new URLSearchParams(window.location.search).get('wallet');
-        fetch(`/wallet_data?wallet=${walletAddress}`)
-            .then(response => response.json())
-            .then(data => {
+        function updateWalletData() {
+            const walletAddress = new URLSearchParams(window.location.search).get('wallet');
+            fetch(`/wallet_data?wallet=${walletAddress}`).then(response => response.json()).then(data => {
                 document.getElementById('current-balance').innerHTML = `${data.current_balance} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon">`;
                 document.getElementById('pnl-value').innerHTML = `${data.pnl > 0 ? "+" : ""}${data.pnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon">`;
                 document.getElementById('today-pnl').className = `pnl ${data.pnl > 0 ? 'pnl-positive' : data.pnl < 0 ? 'pnl-negative' : 'pnl-neutral'}`;
@@ -229,7 +264,7 @@ def track_wallet():
             'current_balance': 0,
             'pnl': 0,
             'week_pnl': 0,
-            'month_pnl': 0,
+            'month_pnl': 0
         }
 
     return render_template_string(HTML_TEMPLATE, show_week_pnl=show_week_pnl, show_month_pnl=show_month_pnl, **user_data[wallet_address])
