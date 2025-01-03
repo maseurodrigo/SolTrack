@@ -1,6 +1,6 @@
 import requests, threading, time, base58
 
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template_string, jsonify
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -18,11 +18,6 @@ HTML_TEMPLATE = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solana Wallet Tracker</title>
-    <script>
-        setInterval(() => {
-            window.location.reload();
-        }, 5000);
-    </script>
     <style>
         body {
             font-family: monaco, Consolas, Lucida Console, monospace;
@@ -72,28 +67,47 @@ HTML_TEMPLATE = """
     </style>
 </head>
 <body>
-    <div class="container">
+    <div id="wallet-container" class="container">
         <div class="balance">
             <div class="balance-title">BALANCE</div>
-            <div class="balance-value">{{ current_balance }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
+            <div id="current-balance" class="balance-value">{{ current_balance }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
         </div>
-        <div class="pnl {% if pnl > 0 %}pnl-positive{% elif pnl < 0 %}pnl-negative{% else %}pnl-neutral{% endif %}">
+        <div id="today-pnl" class="pnl {% if pnl > 0 %}pnl-positive{% elif pnl < 0 %}pnl-negative{% else %}pnl-neutral{% endif %}">
             <div class="pnl-title">TODAY PNL</div>
-            <div class="pnl-value">{{ "+" if pnl > 0 else "" }}{{ pnl }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
+            <div id="pnl-value" class="pnl-value">{{ "+" if pnl > 0 else "" }}{{ pnl }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
         </div>
         {% if show_week_pnl %}
-        <div class="pnl {% if week_pnl > 0 %}pnl-positive{% elif week_pnl < 0 %}pnl-negative{% else %}pnl-neutral{% endif %}">
+        <div id="weekly-pnl" class="pnl {% if week_pnl > 0 %}pnl-positive{% elif week_pnl < 0 %}pnl-negative{% else %}pnl-neutral{% endif %}">
             <div class="pnl-title">WEEKLY PNL</div>
-            <div class="pnl-value">{{ "+" if week_pnl > 0 else "" }}{{ week_pnl }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
+            <div id="week-pnl-value" class="pnl-value">{{ "+" if week_pnl > 0 else "" }}{{ week_pnl }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
         </div>
         {% endif %}
         {% if show_month_pnl %}
-        <div class="pnl {% if month_pnl > 0 %}pnl-positive{% elif month_pnl < 0 %}pnl-negative{% else %}pnl-neutral{% endif %}">
+        <div id="monthly-pnl" class="pnl {% if month_pnl > 0 %}pnl-positive{% elif month_pnl < 0 %}pnl-negative{% else %}pnl-neutral{% endif %}">
             <div class="pnl-title">MONTHLY PNL</div>
-            <div class="pnl-value">{{ "+" if month_pnl > 0 else "" }}{{ month_pnl }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
+            <div id="month-pnl-value" class="pnl-value">{{ "+" if month_pnl > 0 else "" }}{{ month_pnl }} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon"></div>
         </div>
         {% endif %}
     </div>
+    <script>
+    function updateWalletData() {
+        const walletAddress = new URLSearchParams(window.location.search).get('wallet');
+        fetch(`/wallet_data?wallet=${walletAddress}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('current-balance').innerHTML = `${data.current_balance} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon">`;
+                document.getElementById('pnl-value').innerHTML = `${data.pnl > 0 ? "+" : ""}${data.pnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon">`;
+                document.getElementById('today-pnl').className = `pnl ${data.pnl > 0 ? 'pnl-positive' : data.pnl < 0 ? 'pnl-negative' : 'pnl-neutral'}`;
+                
+                document.getElementById('week-pnl-value').innerHTML = `${data.week_pnl > 0 ? "+" : ""}${data.week_pnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon">`;
+                document.getElementById('weekly-pnl').className = `pnl ${data.week_pnl > 0 ? 'pnl-positive' : data.week_pnl < 0 ? 'pnl-negative' : 'pnl-neutral'}`;
+                
+                document.getElementById('month-pnl-value').innerHTML = `${data.month_pnl > 0 ? "+" : ""}${data.month_pnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" class="solana-icon">`;
+                document.getElementById('monthly-pnl').className = `pnl ${data.month_pnl > 0 ? 'pnl-positive' : data.month_pnl < 0 ? 'pnl-negative' : 'pnl-neutral'}`;
+            });
+        }
+        setInterval(updateWalletData, 5000);
+    </script>
 </body>
 </html>
 """
@@ -175,6 +189,18 @@ def is_valid_solana_address(address):
     except Exception:
         return False
 
+@app.route('/wallet_data')
+def wallet_data():
+    # Get 'wallet' parameter from the request
+    wallet_address = request.args.get('wallet', '')
+
+    # Return wallet data as JSON if the address exists in user_data
+    if wallet_address in user_data:
+        return jsonify(user_data[wallet_address])
+
+    # Return empty JSON response with a 404 status if the wallet address isn't found
+    return jsonify({}), 404
+
 @app.route('/')
 def track_wallet():
     """
@@ -210,4 +236,4 @@ def track_wallet():
 
 if __name__ == "__main__":
     threading.Thread(target=update_wallet_data, daemon=True).start() # Start the background thread for updating wallet data
-    app.run(host='0.0.0.0', port=8080, debug=False) # Run the Flask app on port 8080
+    app.run(host='0.0.0.0', port=8080) # Run the Flask app on port 8080
