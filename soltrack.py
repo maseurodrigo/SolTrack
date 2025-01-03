@@ -210,4 +210,4 @@ def track_wallet():
 
 if __name__ == "__main__":
     threading.Thread(target=update_wallet_data, daemon=True).start() # Start the background thread for updating wallet data
-    app.run(host='0.0.0.0', port=8080, debug=True) # Run the Flask app on port 8080
+    app.run(host='0.0.0.0', port=8080, debug=False) # Run the Flask app on port 8080
