@@ -47,7 +47,7 @@ To run this project, ensure you have the following installed:
 3. **Run the Application**:
 
    ```bash
-   python app.py
+   python soltrack.py
    ```
 
 4. **Access the Dashboard**:
