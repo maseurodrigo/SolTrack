@@ -24,8 +24,8 @@ It provides a simple and elegant web interface to monitor wallet activity in rea
 
 To run this project, ensure you have the following installed:
 
-- **Python 3.8+**
-- **Pip** (Python package installer)
+- **Node.js 16+**
+- **npm** (Node package manager)
 
 ---
 
@@ -41,17 +41,17 @@ To run this project, ensure you have the following installed:
 2. **Install Dependencies**:
 
    ```bash
-   pip install -r requirements.txt
+   npm install
    ```
-   
+
 3. **Run the Application**:
 
    ```bash
-   python soltrack.py
+   npm run dev
    ```
 
 4. **Access the Dashboard**:
-   Open your browser and navigate to `http://127.0.0.1:5000`.
+   Open your browser and navigate to `http://localhost:3000`.
 
 ---
 
@@ -59,21 +59,12 @@ To run this project, ensure you have the following installed:
 
 ### Querying a Wallet Address
 
-To track a wallet, add the `wallet` query parameter in the URL. For example:
+To track a wallet, enter the wallet address in the input field on the dashboard and click "Track Wallet"
 
-```
-http://127.0.0.1:5000/?wallet=YOUR_WALLET_ADDRESS
-```
+### Optional Features
 
-### Optional Parameters
-
-- **`show_week_pnl`**: Display weekly PnL. Set to `true` to enable.
-- **`show_month_pnl`**: Display monthly PnL. Set to `true` to enable.
-
-Example:
-```
-http://127.0.0.1:5000/?wallet=YOUR_WALLET_ADDRESS&show_week_pnl=true&show_month_pnl=true
-```
+- **Weekly PnL**: Enable the "Show Weekly PnL" toggle to display weekly profit and loss.
+- **Monthly PnL**: Enable the "Show Monthly PnL" toggle to display monthly profit and loss.
 
 ---
 
