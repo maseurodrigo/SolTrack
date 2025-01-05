@@ -4,6 +4,7 @@
   "description": "Simple web interface to monitor Solana wallet activity",
   "main": "index.js",
   "dependencies": {
+    "@nextui-org/react": "^2.6.11",
     "bs58": "^6.0.0",
     "next": "^15.1.3",
     "react": "^19.0.0",
@@ -26,8 +27,11 @@
   },
   "homepage": "https://github.com/maseurodrigo/SolTrack#readme",
   "devDependencies": {
+    "@types/node": "22.10.5",
+    "@types/react": "19.0.2",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "typescript": "5.7.2"
   }
 }

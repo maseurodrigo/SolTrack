@@ -1,5 +1,26 @@
 import { useEffect, useState } from "react";
 import { toast } from 'react-hot-toast';
+import { RadioGroup, Radio, cn } from "@nextui-org/react";
+import Image from 'next/image';
+
+export const  PlatformRadio = (props) => {
+  const {children, ...otherProps} = props;
+  return (
+    <Radio
+      {...otherProps}
+      classNames={{
+        base: cn(
+          "flex justify-center items-center",
+          "rounded-lg bg-[#1F2029] border border-[#343641]",
+          "px-4 py-2 max-w-[300px] transition-all duration-200 cursor-pointer",
+          "data-[selected=true]:outline-none data-[selected=true]:ring-1 data-[selected=true]:ring-opacity-50 data-[selected=true]:ring-green-800 data-[selected=true]:shadow-xl"
+        ),
+      }}
+    >
+      {children}
+    </Radio>
+  );
+};
 
 const WalletTracker = () => {
   const [walletData, setWalletData] = useState(null);
@@ -7,6 +28,7 @@ const WalletTracker = () => {
   const [inputAddress, setInputAddress] = useState(""); // State for the form input
   const [showWeekPnl, setShowWeekPnl] = useState(false); // State to toggle weekly PnL
   const [showMonthPnl, setShowMonthPnl] = useState(false); // State to toggle monthly PnL
+  const [platSelected, setPlatSelected] = useState(""); // State to toggle selected platform
 
   // Function to track shown error messages (in-memory approach)
   const shownErrors = new Set(); 
@@ -98,74 +120,117 @@ const WalletTracker = () => {
   const monthPnl = formatValue(walletData?.monthPnl ?? 0);
 
   return (
-    <div>      
+    <div>
       {/* Wallet Address Input Form */}
-      <form onSubmit={handleSubmit} className="mt-24 mb-8">
+      <form onSubmit={handleSubmit} className="mt-36 mb-12">
         <input
           type="text"
           placeholder="Enter SOL Address"
           value={inputAddress}
           onChange={handleWalletAddressChange}
-          className="bg-[#202124] text-white border border-[#444] rounded-md w-2/5 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-green-800 focus:shadow-xl" />
+          className="bg-[#1F2029] text-gray-300 border border-[#343641] rounded-lg w-2/5 px-4 py-3 transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-opacity-50 focus:ring-green-800 focus:shadow-xl" />
         <button 
           type="submit" 
-          className="bg-green-600 hover:bg-green-500 text-white font-bold ml-2 py-2 px-4 rounded-md shadow-md">
+          className="bg-green-600 hover:bg-green-500 ml-2 py-2 px-4 rounded-md cursor-pointer shadow-md">
           🕵
         </button>
       </form>
-      <div class="flex justify-center items-center">
-        {/* Checkbox to toggle weekly PnL */}
-        <div className="mr-16">
-          <label class="flex justify-center items-center">
-            <input
-              type="checkbox"
-              checked={showWeekPnl}
-              onChange={handleWeekPnlToggle}
-              className="appearance-none bg-[#202124] border border-[#444] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 shadow-md" />
-            Show Weekly PnL
-          </label>
+      <div class="flex justify-center items-center w-full">
+        <div class="w-auto border-r-2 border-[#343641] mr-12 pr-12">
+          <div class="flex justify-center items-center">
+            {/* Checkbox to toggle weekly PnL */}
+            <div className="mb-6">
+              <label class="flex justify-center items-center text-gray-300 font-medium">
+                <input
+                  type="checkbox"
+                  checked={showWeekPnl}
+                  onChange={handleWeekPnlToggle}
+                  className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md" />
+                Show Weekly PnL
+              </label>
+            </div>
+          </div>
+          <div class="flex justify-center items-center">
+            {/* Checkbox to toggle monthly PnL */}
+            <div>
+              <label class="flex justify-center items-center text-gray-300 font-medium">
+                <input
+                  type="checkbox"
+                  checked={showMonthPnl}
+                  onChange={handleMonthPnlToggle}
+                  className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md" />
+                Show Monthly PnL
+              </label>
+            </div>
+          </div>
         </div>
-        {/* Checkbox to toggle monthly PnL */}
-        <div>
-          <label class="flex justify-center items-center">
-            <input
-              type="checkbox"
-              checked={showMonthPnl}
-              onChange={handleMonthPnlToggle}
-              className="appearance-none bg-[#202124] border border-[#444] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 shadow-md" />
-            Show Monthly PnL
-          </label>
+        <div class="w-auto">
+        <div className="flex justify-left items-center">
+          <RadioGroup orientation="horizontal" defaultValue="noplat" onValueChange={setPlatSelected}>
+            <PlatformRadio className="mr-4" value="noplat">
+                <Image 
+                  alt="noplat"
+                  width={"100"}
+                  height={"100"}
+                  className="w-16 h-16 -ml-2 object-contain drop-shadow-md"
+                  src={"/noplat.png"}/>
+              </PlatformRadio>
+              <PlatformRadio className="mr-4" value="photon">
+                <Image 
+                  alt="photon"
+                  width={"100"}
+                  height={"100"}
+                  className="w-16 h-16 -ml-2 object-contain drop-shadow-md"
+                  src={"/photon.png"}/>
+              </PlatformRadio>
+              <PlatformRadio value="bullx">
+                <Image 
+                  alt="bullx"
+                  width={"100"}
+                  height={"100"}
+                  className="w-16 h-16 -ml-2 object-contain drop-shadow-md"
+                  src={"/bullx.png"}/>
+              </PlatformRadio>
+            </RadioGroup>
+          </div>
         </div>
       </div>
-
       {walletData ? (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="flex justify-center items-center bg-white/5 rounded-md shadow-2xl">
+        <div className="fixed top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="flex justify-center items-center bg-[#1F2029] text-white px-4 rounded-lg shadow-2xl">
+            <div className="flex justify-center items-center text-shadow">
+              {platSelected && platSelected !== "noplat" && (
+                <img
+                  src={`/${platSelected}.png`}
+                  alt={platSelected}
+                  className="w-auto h-auto max-w-32 max-h-32 filter drop-shadow-xl"/>
+              )}
+            </div>
             <div className="text-9xl p-12">
-              <div className="text-sm uppercase text-gray-400 text-shadow-sm mb-2">BALANCE</div>
+              <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">BALANCE</div>
               <div className="flex justify-center items-center text-4xl font-bold text-shadow">
-                {formatValue(walletData.currentBalance)} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow" />
+                {formatValue(walletData.currentBalance)} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
               </div>
             </div>
             <div className={`text-9xl p-12 ${todayPnl > 0 ? 'text-green-500' : todayPnl < 0 ? 'text-red-500' : 'text-white'}`}>
-              <div className="text-sm uppercase text-gray-400 text-shadow-sm mb-2">TODAY PNL</div>
+              <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">TODAY PNL</div>
               <div className="flex justify-center items-center text-4xl font-bold text-shadow">
-                {todayPnl > 0 ? "+" : ""}{todayPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow" />
+                {todayPnl > 0 ? "+" : ""}{todayPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
               </div>
             </div>
             {showWeekPnl && (
               <div className={`text-9xl p-12 ${weekPnl > 0 ? 'text-green-500' : weekPnl < 0 ? 'text-red-500' : 'text-white'}`}>
-                <div className="text-sm uppercase text-gray-400 text-shadow-sm mb-2">WEEKLY PNL</div>
+                <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">WEEKLY PNL</div>
                 <div className="flex justify-center items-center text-4xl font-bold text-shadow">
-                  {weekPnl > 0 ? "+" : ""}{weekPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow" />
+                  {weekPnl > 0 ? "+" : ""}{weekPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
                 </div>
               </div>
             )}
             {showMonthPnl && (
               <div className={`text-9xl p-12 ${monthPnl > 0 ? 'text-green-500' : monthPnl < 0 ? 'text-red-500' : 'text-white'}`}>
-                <div className="text-sm uppercase text-gray-400 text-shadow-sm mb-2">MONTHLY PNL</div>
+                <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">MONTHLY PNL</div>
                 <div className="flex justify-center items-center text-4xl font-bold text-shadow">
-                  {monthPnl > 0 ? "+" : ""}{monthPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow" />
+                  {monthPnl > 0 ? "+" : ""}{monthPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
                 </div>
               </div>
             )}

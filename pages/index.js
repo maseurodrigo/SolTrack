@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
+import Head from 'next/head'
+
 import WalletTracker from "./components/WalletTracker";
 
 export default function Home() {
@@ -12,6 +14,10 @@ export default function Home() {
 
   return (
     <>
+      <Head>
+        <title>SolTrack</title>
+        <meta property="og:title" content="SolTrack" key="title"/>
+      </Head>
       <Toaster position="top-center"/>
       <WalletTracker/>
     </>

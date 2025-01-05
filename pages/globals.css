@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Hide all radio buttons without affecting layout */
+input[type="radio"] {
+    @apply sr-only; 
+}

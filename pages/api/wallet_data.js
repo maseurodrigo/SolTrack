@@ -1,5 +1,5 @@
-import { getSolBalance } from "../../utils/solana";
 import { isValidSolanaAddress } from "../../utils/validation";
+import { getSolBalance } from "../../utils/solana";
 
 let userData = {};
 
@@ -12,16 +12,16 @@ export default async function handler(req, res) {
 
   if (!userData[wallet]) {
     userData[wallet] = {
-      currentBalance: 0,
-      pnl: 0,
-      weekPnl: 0,
-      monthPnl: 0,
       startingDate: "",
       startingBalance: 0,
       weekStartDate: "",
       weekStartBalance: 0,
       monthStartDate: "",
-      monthStartBalance: 0
+      monthStartBalance: 0,
+      currentBalance: 0,
+      pnl: 0,
+      weekPnl: 0,
+      monthPnl: 0
     };
   }
   
@@ -53,18 +53,18 @@ export default async function handler(req, res) {
   const monthPnl = +(currentBalance - data.monthStartBalance).toFixed(2);
 
   const updatedData = {
-    currentBalance,
-    pnl,
-    weekPnl,
-    monthPnl,
     startingDate: data.startingDate,
     startingBalance: data.startingBalance,
     weekStartDate: data.weekStartDate,
     weekStartBalance: data.weekStartBalance,
     monthStartDate: data.monthStartDate,
-    monthStartBalance: data.monthStartBalance
+    monthStartBalance: data.monthStartBalance,
+    currentBalance,
+    pnl,
+    weekPnl,
+    monthPnl
   };
-
+  
   userData[wallet] = updatedData;
 
   res.json(updatedData);
