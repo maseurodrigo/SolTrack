@@ -1,7 +1,6 @@
 # SolTrack
 
-**SolTrack** is a lightweight Flask-based web application for tracking Solana wallet balances and calculating daily, weekly, and monthly profit and loss (PnL) statistics. 
-It provides a simple and elegant web interface to monitor wallet activity in real-time.
+**SolTrack** is a lightweight, real-time web application built with Next.js for tracking Solana wallet balances and calculating daily, weekly, and monthly profit and loss (PnL) statistics. It features a fast, responsive, and elegant user interface, leveraging the server-side rendering and API routes of Next.js to monitor wallet activity in real-time.
 
 ---
 
