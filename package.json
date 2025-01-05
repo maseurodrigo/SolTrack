@@ -11,9 +11,9 @@
     "react-hot-toast": "^2.5.1"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "dev": "next dev -p 8080",
+    "build": "next build -p 8080",
+    "start": "next start -p 8080"
   },
   "repository": {
     "type": "git",
