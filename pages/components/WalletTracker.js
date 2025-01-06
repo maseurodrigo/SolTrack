@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { toast } from 'react-hot-toast';
 import { RadioGroup, Radio, cn } from "@nextui-org/react";
 import Image from 'next/image';
+import RemoveBackCSS from './RemoveBackCSS';
 
-export const  PlatformRadio = (props) => {
+export const PlatformRadio = (props) => {
   const {children, ...otherProps} = props;
   return (
     <Radio
@@ -26,6 +27,7 @@ const WalletTracker = () => {
   const [walletData, setWalletData] = useState(null);
   const [walletAddress, setWalletAddress] = useState(""); // State for wallet address input
   const [inputAddress, setInputAddress] = useState(""); // State for the form input
+  const [showRemoveBackCSS, setRemoveBackCSS] = useState(false); // State to toggle background CSS code
   const [showWeekPnl, setShowWeekPnl] = useState(false); // State to toggle weekly PnL
   const [showMonthPnl, setShowMonthPnl] = useState(false); // State to toggle monthly PnL
   const [platSelected, setPlatSelected] = useState(""); // State to toggle selected platform
@@ -104,6 +106,10 @@ const WalletTracker = () => {
     setWalletAddress(inputAddress); // Set the wallet address from the form input
   };
 
+  const handleRemoveBackCSS = () => {
+    setRemoveBackCSS((prev) => !prev); // Toggle background CSS code
+  };
+
   const handleWeekPnlToggle = () => {
     setShowWeekPnl((prev) => !prev); // Toggle weekly PnL
   };
@@ -140,7 +146,7 @@ const WalletTracker = () => {
           <div class="w-auto border-r-2 border-[#343641] mr-12 pr-12">
             <div class="flex justify-start items-center">
               {/* Checkbox to toggle weekly PnL */}
-              <div className="mb-6">
+              <div className="mb-4">
                 <label class="flex justify-center items-center text-gray-300 font-medium">
                   <input
                     type="checkbox"
@@ -153,7 +159,7 @@ const WalletTracker = () => {
             </div>
             <div class="flex justify-start items-center">
               {/* Checkbox to toggle monthly PnL */}
-              <div>
+              <div className="mb-4">
                 <label class="flex justify-center items-center text-gray-300 font-medium">
                   <input
                     type="checkbox"
@@ -161,6 +167,19 @@ const WalletTracker = () => {
                     onChange={handleMonthPnlToggle}
                     className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md" />
                   Show Monthly PnL
+                </label>
+              </div>
+            </div>
+            <div class="flex justify-start items-center">
+              {/* Checkbox to background CSS code */}
+              <div>
+                <label class="flex justify-center items-center text-gray-300 font-medium">
+                  <input
+                    type="checkbox"
+                    checked={showRemoveBackCSS}
+                    onChange={handleRemoveBackCSS}
+                    className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md" />
+                    Remove Background CSS Code
                 </label>
               </div>
             </div>
@@ -197,6 +216,13 @@ const WalletTracker = () => {
           </div>
         </div>
       </div>
+      {showRemoveBackCSS && (
+        <div className="flex justify-center items-center w-full">
+          <div className="flex justify-center items-center bg-[rgba(31,32,41,0.2)] text-white px-8 py-2 rounded-lg shadow-lg mt-4">
+            <RemoveBackCSS />
+          </div>
+        </div>
+      )}
       {walletData ? (
         <div className="fixed top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className="flex justify-center items-center bg-[#1F2029] text-white px-4 rounded-lg shadow-2xl">
