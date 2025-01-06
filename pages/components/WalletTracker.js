@@ -13,7 +13,7 @@ export const  PlatformRadio = (props) => {
           "flex justify-center items-center",
           "rounded-lg bg-[#1F2029] border border-[#343641]",
           "px-4 py-2 max-w-[300px] transition-all duration-200 cursor-pointer",
-          "data-[selected=true]:outline-none data-[selected=true]:ring-1 data-[selected=true]:ring-opacity-50 data-[selected=true]:ring-green-800 data-[selected=true]:shadow-xl"
+          "data-[selected=true]:outline-none data-[selected=true]:ring-1 data-[selected=true]:ring-opacity-50 data-[selected=true]:ring-green-800 data-[selected=true]:shadow-lg"
         ),
       }}
     >
@@ -122,7 +122,7 @@ const WalletTracker = () => {
   return (
     <div>
       {/* Wallet Address Input Form */}
-      <form onSubmit={handleSubmit} className="mt-36 mb-12">
+      <form onSubmit={handleSubmit} className="flex justify-center items-center mt-36 mb-8">
         <input
           type="text"
           placeholder="Enter SOL Address"
@@ -131,67 +131,69 @@ const WalletTracker = () => {
           className="bg-[#1F2029] text-gray-300 border border-[#343641] rounded-lg w-2/5 px-4 py-3 transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-opacity-50 focus:ring-green-800 focus:shadow-xl" />
         <button 
           type="submit" 
-          className="bg-green-600 hover:bg-green-500 ml-2 py-2 px-4 rounded-md cursor-pointer shadow-md">
-          🕵
+          className="bg-green-600 hover:bg-green-500 ml-2 py-3 px-3 rounded-md cursor-pointer shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
         </button>
       </form>
       <div class="flex justify-center items-center w-full">
-        <div class="w-auto border-r-2 border-[#343641] mr-12 pr-12">
-          <div class="flex justify-center items-center">
-            {/* Checkbox to toggle weekly PnL */}
-            <div className="mb-6">
-              <label class="flex justify-center items-center text-gray-300 font-medium">
-                <input
-                  type="checkbox"
-                  checked={showWeekPnl}
-                  onChange={handleWeekPnlToggle}
-                  className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md" />
-                Show Weekly PnL
-              </label>
+        <div class="flex justify-center items-center bg-[rgba(31,32,41,0.2)] px-16 py-8 rounded-lg shadow-md">
+          <div class="w-auto border-r-2 border-[#343641] mr-12 pr-12">
+            <div class="flex justify-start items-center">
+              {/* Checkbox to toggle weekly PnL */}
+              <div className="mb-6">
+                <label class="flex justify-center items-center text-gray-300 font-medium">
+                  <input
+                    type="checkbox"
+                    checked={showWeekPnl}
+                    onChange={handleWeekPnlToggle}
+                    className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md" />
+                  Show Weekly PnL
+                </label>
+              </div>
+            </div>
+            <div class="flex justify-start items-center">
+              {/* Checkbox to toggle monthly PnL */}
+              <div>
+                <label class="flex justify-center items-center text-gray-300 font-medium">
+                  <input
+                    type="checkbox"
+                    checked={showMonthPnl}
+                    onChange={handleMonthPnlToggle}
+                    className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md" />
+                  Show Monthly PnL
+                </label>
+              </div>
             </div>
           </div>
-          <div class="flex justify-center items-center">
-            {/* Checkbox to toggle monthly PnL */}
-            <div>
-              <label class="flex justify-center items-center text-gray-300 font-medium">
-                <input
-                  type="checkbox"
-                  checked={showMonthPnl}
-                  onChange={handleMonthPnlToggle}
-                  className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md" />
-                Show Monthly PnL
-              </label>
+          <div class="w-auto">
+            <div className="flex justify-left items-center">
+              <RadioGroup orientation="horizontal" defaultValue="noplat" onValueChange={setPlatSelected}>
+                <PlatformRadio className="mr-4" value="noplat">
+                  <Image 
+                    alt="noplat"
+                    width={"100"}
+                    height={"100"}
+                    className="w-16 h-16 -ml-2 object-contain drop-shadow-md"
+                    src={"/noplat.png"}/>
+                </PlatformRadio>
+                <PlatformRadio className="mr-4" value="photon">
+                  <Image 
+                    alt="photon"
+                    width={"100"}
+                    height={"100"}
+                    className="w-16 h-16 -ml-2 object-contain drop-shadow-md"
+                    src={"/photon.png"}/>
+                </PlatformRadio>
+                <PlatformRadio value="bullx">
+                  <Image 
+                    alt="bullx"
+                    width={"100"}
+                    height={"100"}
+                    className="w-16 h-16 -ml-2 object-contain drop-shadow-md"
+                    src={"/bullx.png"}/>
+                </PlatformRadio>
+              </RadioGroup>
             </div>
-          </div>
-        </div>
-        <div class="w-auto">
-        <div className="flex justify-left items-center">
-          <RadioGroup orientation="horizontal" defaultValue="noplat" onValueChange={setPlatSelected}>
-            <PlatformRadio className="mr-4" value="noplat">
-                <Image 
-                  alt="noplat"
-                  width={"100"}
-                  height={"100"}
-                  className="w-16 h-16 -ml-2 object-contain drop-shadow-md"
-                  src={"/noplat.png"}/>
-              </PlatformRadio>
-              <PlatformRadio className="mr-4" value="photon">
-                <Image 
-                  alt="photon"
-                  width={"100"}
-                  height={"100"}
-                  className="w-16 h-16 -ml-2 object-contain drop-shadow-md"
-                  src={"/photon.png"}/>
-              </PlatformRadio>
-              <PlatformRadio value="bullx">
-                <Image 
-                  alt="bullx"
-                  width={"100"}
-                  height={"100"}
-                  className="w-16 h-16 -ml-2 object-contain drop-shadow-md"
-                  src={"/bullx.png"}/>
-              </PlatformRadio>
-            </RadioGroup>
           </div>
         </div>
       </div>
