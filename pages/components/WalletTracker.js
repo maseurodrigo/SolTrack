@@ -4,6 +4,8 @@ import { RadioGroup, Radio, cn } from "@nextui-org/react";
 import Image from 'next/image';
 import RemoveBackCSS from './RemoveBackCSS';
 
+import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
+
 export const PlatformRadio = (props) => {
   const {children, ...otherProps} = props;
   return (
@@ -25,12 +27,16 @@ export const PlatformRadio = (props) => {
 
 const WalletTracker = () => {
   const [walletData, setWalletData] = useState(null);
-  const [walletAddress, setWalletAddress] = useState(""); // State for wallet address input
+  const [walletDetails, setWalletDetails] = useState("");
   const [inputAddress, setInputAddress] = useState(""); // State for the form input
-  const [showRemoveBackCSS, setRemoveBackCSS] = useState(false); // State to toggle background CSS code
+  const [walletAddress, setWalletAddress] = useState(""); // State for wallet address input
   const [showWeekPnl, setShowWeekPnl] = useState(false); // State to toggle weekly PnL
   const [showMonthPnl, setShowMonthPnl] = useState(false); // State to toggle monthly PnL
+  const [showRemoveBackCSS, setRemoveBackCSS] = useState(false); // State to toggle background CSS code
   const [platSelected, setPlatSelected] = useState(""); // State to toggle selected platform
+
+  // Get the current URL as a string
+  const [currentPath, setCurrentPath] = useState("");
 
   // Function to track shown error messages (in-memory approach)
   const shownErrors = new Set(); 
@@ -54,7 +60,7 @@ const WalletTracker = () => {
         }
         return;
       }
-
+      
       const response = await fetch(`/api/wallet_data?wallet=${walletAddress}`);
 
       // If response is not okay, parse the error response
@@ -71,7 +77,6 @@ const WalletTracker = () => {
       
       const data = await response.json();
       setWalletData(data);
-      
     } catch (err) {
       // Check if error message has already been shown using the Set
       if (!hasShownError(err.message)) {
@@ -80,10 +85,15 @@ const WalletTracker = () => {
       }
     }
   };
-  
+
   useEffect(() => {
-    // Clear errors when walletAddress changes
-    shownErrors.clear(); 
+    if (typeof window !== 'undefined') {
+      setCurrentPath(window.location.href); // Access window object
+    }
+  }, []);
+
+  useEffect(() => {
+    shownErrors.clear();  // Clear errors when walletAddress changes
 
     if (walletAddress) {
       fetchData(); // Fetch data when walletAddress changes
@@ -101,13 +111,19 @@ const WalletTracker = () => {
     setInputAddress(event.target.value); // Update input value
   };
 
+  useEffect(() => {
+    const walletData = { walletAddress, showWeekPnl, showMonthPnl, platSelected };
+
+    // Convert data to query parameters for new tab navigation
+    const queryParams = new URLSearchParams(walletData).toString();
+
+    // Store URL with the data passed as query params
+    setWalletDetails(`${currentPath}components/WalletDetails?${queryParams}`);
+  }, [walletAddress, showWeekPnl, showMonthPnl, platSelected]); // Re-fetch when walletAddress, showWeekPnl, showMonthPnl or platSelected change
+
   const handleSubmit = (event) => {
     event.preventDefault();
     setWalletAddress(inputAddress); // Set the wallet address from the form input
-  };
-
-  const handleRemoveBackCSS = () => {
-    setRemoveBackCSS((prev) => !prev); // Toggle background CSS code
   };
 
   const handleWeekPnlToggle = () => {
@@ -116,6 +132,10 @@ const WalletTracker = () => {
 
   const handleMonthPnlToggle = () => {
     setShowMonthPnl((prev) => !prev); // Toggle monthly PnL
+  };
+
+  const handleRemoveBackCSS = () => {
+    setRemoveBackCSS((prev) => !prev); // Toggle background CSS code
   };
 
   // Fallback values to 0 if data is null or undefined, and format to 2 decimal places
@@ -138,7 +158,7 @@ const WalletTracker = () => {
         <button 
           type="submit" 
           className="bg-green-600 hover:bg-green-500 ml-2 py-3 px-3 rounded-md cursor-pointer shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-search"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
         </button>
       </form>
       <div class="flex justify-center items-center w-full">
@@ -147,12 +167,12 @@ const WalletTracker = () => {
             <div class="flex justify-start items-center">
               {/* Checkbox to toggle weekly PnL */}
               <div className="mb-4">
-                <label class="flex justify-center items-center text-gray-300 font-medium">
+                <label class="flex justify-center items-center text-gray-300 font-medium cursor-pointer">
                   <input
                     type="checkbox"
                     checked={showWeekPnl}
                     onChange={handleWeekPnlToggle}
-                    className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md" />
+                    className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md cursor-pointer" />
                   Show Weekly PnL
                 </label>
               </div>
@@ -160,12 +180,12 @@ const WalletTracker = () => {
             <div class="flex justify-start items-center">
               {/* Checkbox to toggle monthly PnL */}
               <div className="mb-4">
-                <label class="flex justify-center items-center text-gray-300 font-medium">
+                <label class="flex justify-center items-center text-gray-300 font-medium cursor-pointer">
                   <input
                     type="checkbox"
                     checked={showMonthPnl}
                     onChange={handleMonthPnlToggle}
-                    className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md" />
+                    className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md cursor-pointer" />
                   Show Monthly PnL
                 </label>
               </div>
@@ -173,12 +193,12 @@ const WalletTracker = () => {
             <div class="flex justify-start items-center">
               {/* Checkbox to background CSS code */}
               <div>
-                <label class="flex justify-center items-center text-gray-300 font-medium">
+                <label class="flex justify-center items-center text-gray-300 font-medium cursor-pointer">
                   <input
                     type="checkbox"
                     checked={showRemoveBackCSS}
                     onChange={handleRemoveBackCSS}
-                    className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md" />
+                    className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md cursor-pointer" />
                     Remove Background CSS Code
                 </label>
               </div>
@@ -219,50 +239,144 @@ const WalletTracker = () => {
       {showRemoveBackCSS && (
         <div className="flex justify-center items-center w-full">
           <div className="flex justify-center items-center bg-[rgba(31,32,41,0.2)] text-white px-8 py-2 rounded-lg shadow-lg mt-4">
-            <RemoveBackCSS />
+            <RemoveBackCSS/>
+          </div>
+        </div>
+      )}
+      {currentPath && walletAddress && walletDetails && (
+        <div className="flex justify-center items-center w-full mt-12">
+          <div className="flex justify-center items-center bg-[rgba(31,32,41,0.2)] text-white px-8 py-2 rounded-lg shadow-lg mt-4">
+            {walletDetails}
           </div>
         </div>
       )}
       {walletData ? (
-        <div className="fixed top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="flex justify-center items-center bg-[#1F2029] text-white px-4 rounded-lg shadow-2xl">
-            <div className="flex justify-center items-center text-shadow">
+        <div className="flex justify-center items-center mt-6">
+          {todayPnl < 0 && ( 
+            <AnimatedBorderTrail trailSize="lg" trailColor="red"> 
+              <div className="flex justify-center items-center bg-[#1F2029] text-white max-w-fit px-4 rounded-lg shadow-2xl">
+                {platSelected && platSelected !== "noplat" && (
+                  <div className="flex justify-center items-center text-shadow">
+                    <img
+                      src={`/${platSelected}.png`}
+                      alt={platSelected}
+                      className="w-auto h-auto max-w-32 max-h-32 filter drop-shadow-xl"/>
+                  </div>
+                )}
+                <div className="text-9xl p-12">
+                  <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">BALANCE</div>
+                  <div className="flex justify-center items-center text-4xl font-bold text-shadow">
+                    {formatValue(walletData.currentBalance)} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                  </div>
+                </div>
+                <div className={`text-9xl p-12 ${todayPnl > 0 ? 'text-green-500' : todayPnl < 0 ? 'text-red-500' : 'text-white'}`}>
+                  <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">TODAY PNL</div>
+                  <div className="flex justify-center items-center text-4xl font-bold text-shadow">
+                    {todayPnl > 0 ? "+" : ""}{todayPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                  </div>
+                </div>
+                {showWeekPnl && (
+                  <div className={`text-9xl p-12 ${weekPnl > 0 ? 'text-green-500' : weekPnl < 0 ? 'text-red-500' : 'text-white'}`}>
+                    <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">WEEKLY PNL</div>
+                    <div className="flex justify-center items-center text-4xl font-bold text-shadow">
+                      {weekPnl > 0 ? "+" : ""}{weekPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                    </div>
+                  </div>
+                )}
+                {showMonthPnl && (
+                  <div className={`text-9xl p-12 ${monthPnl > 0 ? 'text-green-500' : monthPnl < 0 ? 'text-red-500' : 'text-white'}`}>
+                    <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">MONTHLY PNL</div>
+                    <div className="flex justify-center items-center text-4xl font-bold text-shadow">
+                      {monthPnl > 0 ? "+" : ""}{monthPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </AnimatedBorderTrail>
+          )}
+          {todayPnl > 0 && ( 
+            <AnimatedBorderTrail trailSize="lg" trailColor="green"> 
+              <div className="flex justify-center items-center bg-[#1F2029] text-white max-w-fit px-4 rounded-lg shadow-2xl">
+                {platSelected && platSelected !== "noplat" && (
+                  <div className="flex justify-center items-center text-shadow">
+                    <img
+                      src={`/${platSelected}.png`}
+                      alt={platSelected}
+                      className="w-auto h-auto max-w-32 max-h-32 filter drop-shadow-xl"/>
+                  </div>
+                )}
+                <div className="text-9xl p-12">
+                  <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">BALANCE</div>
+                  <div className="flex justify-center items-center text-4xl font-bold text-shadow">
+                    {formatValue(walletData.currentBalance)} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                  </div>
+                </div>
+                <div className={`text-9xl p-12 ${todayPnl > 0 ? 'text-green-500' : todayPnl < 0 ? 'text-red-500' : 'text-white'}`}>
+                  <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">TODAY PNL</div>
+                  <div className="flex justify-center items-center text-4xl font-bold text-shadow">
+                    {todayPnl > 0 ? "+" : ""}{todayPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                  </div>
+                </div>
+                {showWeekPnl && (
+                  <div className={`text-9xl p-12 ${weekPnl > 0 ? 'text-green-500' : weekPnl < 0 ? 'text-red-500' : 'text-white'}`}>
+                    <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">WEEKLY PNL</div>
+                    <div className="flex justify-center items-center text-4xl font-bold text-shadow">
+                      {weekPnl > 0 ? "+" : ""}{weekPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                    </div>
+                  </div>
+                )}
+                {showMonthPnl && (
+                  <div className={`text-9xl p-12 ${monthPnl > 0 ? 'text-green-500' : monthPnl < 0 ? 'text-red-500' : 'text-white'}`}>
+                    <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">MONTHLY PNL</div>
+                    <div className="flex justify-center items-center text-4xl font-bold text-shadow">
+                      {monthPnl > 0 ? "+" : ""}{monthPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </AnimatedBorderTrail>
+          )}
+          {/* This is the "else" condition */}
+          {!(todayPnl < 0 || todayPnl > 0) && ( 
+            <div className="flex justify-center items-center bg-[#1F2029] text-white max-w-fit px-4 rounded-lg shadow-2xl">
               {platSelected && platSelected !== "noplat" && (
-                <img
-                  src={`/${platSelected}.png`}
-                  alt={platSelected}
-                  className="w-auto h-auto max-w-32 max-h-32 filter drop-shadow-xl"/>
+                <div className="flex justify-center items-center text-shadow">
+                  <img
+                    src={`/${platSelected}.png`}
+                    alt={platSelected}
+                    className="w-auto h-auto max-w-32 max-h-32 filter drop-shadow-xl"/>
+                </div>
+              )}
+              <div className="text-9xl p-12">
+                <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">BALANCE</div>
+                <div className="flex justify-center items-center text-4xl font-bold text-shadow">
+                  {formatValue(walletData.currentBalance)} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                </div>
+              </div>
+              <div className={`text-9xl p-12 ${todayPnl > 0 ? 'text-green-500' : todayPnl < 0 ? 'text-red-500' : 'text-white'}`}>
+                <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">TODAY PNL</div>
+                <div className="flex justify-center items-center text-4xl font-bold text-shadow">
+                  {todayPnl > 0 ? "+" : ""}{todayPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                </div>
+              </div>
+              {showWeekPnl && (
+                <div className={`text-9xl p-12 ${weekPnl > 0 ? 'text-green-500' : weekPnl < 0 ? 'text-red-500' : 'text-white'}`}>
+                  <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">WEEKLY PNL</div>
+                  <div className="flex justify-center items-center text-4xl font-bold text-shadow">
+                    {weekPnl > 0 ? "+" : ""}{weekPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                  </div>
+                </div>
+              )}
+              {showMonthPnl && (
+                <div className={`text-9xl p-12 ${monthPnl > 0 ? 'text-green-500' : monthPnl < 0 ? 'text-red-500' : 'text-white'}`}>
+                  <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">MONTHLY PNL</div>
+                  <div className="flex justify-center items-center text-4xl font-bold text-shadow">
+                    {monthPnl > 0 ? "+" : ""}{monthPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                  </div>
+                </div>
               )}
             </div>
-            <div className="text-9xl p-12">
-              <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">BALANCE</div>
-              <div className="flex justify-center items-center text-4xl font-bold text-shadow">
-                {formatValue(walletData.currentBalance)} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
-              </div>
-            </div>
-            <div className={`text-9xl p-12 ${todayPnl > 0 ? 'text-green-500' : todayPnl < 0 ? 'text-red-500' : 'text-white'}`}>
-              <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">TODAY PNL</div>
-              <div className="flex justify-center items-center text-4xl font-bold text-shadow">
-                {todayPnl > 0 ? "+" : ""}{todayPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
-              </div>
-            </div>
-            {showWeekPnl && (
-              <div className={`text-9xl p-12 ${weekPnl > 0 ? 'text-green-500' : weekPnl < 0 ? 'text-red-500' : 'text-white'}`}>
-                <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">WEEKLY PNL</div>
-                <div className="flex justify-center items-center text-4xl font-bold text-shadow">
-                  {weekPnl > 0 ? "+" : ""}{weekPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
-                </div>
-              </div>
-            )}
-            {showMonthPnl && (
-              <div className={`text-9xl p-12 ${monthPnl > 0 ? 'text-green-500' : monthPnl < 0 ? 'text-red-500' : 'text-white'}`}>
-                <div className="text-sm uppercase text-gray-500 tracking-wider text-shadow-sm mb-2">MONTHLY PNL</div>
-                <div className="flex justify-center items-center text-4xl font-bold text-shadow">
-                  {monthPnl > 0 ? "+" : ""}{monthPnl} <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       ) : (
         <></>

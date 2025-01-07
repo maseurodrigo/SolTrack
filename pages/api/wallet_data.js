@@ -66,6 +66,6 @@ export default async function handler(req, res) {
   };
   
   userData[wallet] = updatedData;
-
+  
   res.json(updatedData);
 }
