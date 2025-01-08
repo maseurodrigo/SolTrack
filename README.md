@@ -1,6 +1,6 @@
 # SolTrack
 
-**SolTrack** is a lightweight, real-time web application built with Next.js for tracking Solana wallet balances and calculating daily, weekly, and monthly profit and loss (PnL) statistics. It features a fast, responsive, and elegant user interface, leveraging the server-side rendering and API routes of Next.js to monitor wallet activity in real-time.
+**SolTrack** is a lightweight, real-time web application built with Next.js for tracking Solana wallet balances and calculating daily, weekly, and monthly profit and loss (PnL) statistics.
 
 ---
 
@@ -46,11 +46,11 @@ To run this project, ensure you have the following installed:
 3. **Run the Application**:
 
    ```bash
-   npm run dev
+   npm run start
    ```
 
 4. **Access the Dashboard**:
-   Open your browser and navigate to `http://localhost:3000`.
+   Open your browser and navigate to `http://localhost:8080`.
 
 ---
 
@@ -71,7 +71,6 @@ To track a wallet, enter the wallet address in the input field on the dashboard 
 
 - **RPC URL**: The Solana RPC endpoint is set to the mainnet by default.
 - **Refresh Interval**: The default data refresh interval is 5 seconds.
-- **Minimum PnL Value**: Set via the `MIN_PNL_VALUE` variable to ignore minor changes due to fees.
 
 ---
 

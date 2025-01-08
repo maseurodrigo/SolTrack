@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from 'react-hot-toast';
-import { RadioGroup, Radio, cn } from "@nextui-org/react";
+import { Switch, RadioGroup, Radio, cn } from "@nextui-org/react";
 import Image from 'next/image';
 import RemoveBackCSS from './RemoveBackCSS';
 
@@ -137,7 +137,12 @@ const WalletTracker = () => {
   const handleRemoveBackCSS = () => {
     setRemoveBackCSS((prev) => !prev); // Toggle background CSS code
   };
-
+  
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(walletDetails); // Copies walletDetails to clipboard
+    toast.success("Copied to clipboard");
+  }
+  
   // Fallback values to 0 if data is null or undefined, and format to 2 decimal places
   const formatValue = (value) => (value !== null && value !== undefined ? value.toFixed(2) : "0.00");
 
@@ -146,112 +151,105 @@ const WalletTracker = () => {
   const monthPnl = formatValue(walletData?.monthPnl ?? 0);
 
   return (
-    <div>
-      {/* Wallet Address Input Form */}
-      <form onSubmit={handleSubmit} className="flex justify-center items-center mt-36 mb-8">
-        <input
-          type="text"
-          placeholder="Enter SOL Address"
-          value={inputAddress}
-          onChange={handleWalletAddressChange}
-          className="bg-[#1F2029] text-gray-300 border border-[#343641] rounded-lg w-2/5 px-4 py-3 transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-opacity-50 focus:ring-green-800 focus:shadow-xl" />
-        <button 
-          type="submit" 
-          className="bg-green-600 hover:bg-green-500 ml-2 py-3 px-3 rounded-md cursor-pointer shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-search"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-        </button>
-      </form>
-      <div class="flex justify-center items-center w-full">
-        <div class="flex justify-center items-center bg-[rgba(31,32,41,0.2)] px-16 py-8 rounded-lg shadow-md">
-          <div class="w-auto border-r-2 border-[#343641] mr-12 pr-12">
-            <div class="flex justify-start items-center">
-              {/* Checkbox to toggle weekly PnL */}
-              <div className="mb-4">
-                <label class="flex justify-center items-center text-gray-300 font-medium cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={showWeekPnl}
-                    onChange={handleWeekPnlToggle}
-                    className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md cursor-pointer" />
-                  Show Weekly PnL
-                </label>
+    <div className="pt-24">
+      <div class="flex justify-center items-center">
+        <div class="bg-[rgba(31,32,41,0.2)] px-24 py-12 rounded-lg max-w-fit shadow-md">
+          {/* Wallet Address Input Form */}
+          <form onSubmit={handleSubmit} className="flex justify-center items-center">
+            <input
+              type="text"
+              placeholder="Enter SOL Address"
+              value={inputAddress}
+              onChange={handleWalletAddressChange}
+              className="bg-[#1F2029] text-gray-300 border border-[#343641] rounded-lg w-4/5 px-4 py-3 transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-opacity-50 focus:ring-green-800 focus:shadow-xl" />
+            <button 
+              type="submit" 
+              className="bg-green-600 hover:bg-green-500 ml-2 py-3 px-3 rounded-md cursor-pointer shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-search"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            </button>
+          </form>
+          <div class="flex justify-center items-center mt-12">
+            <div class="w-auto border-r-2 border-[#343641] mr-12 pr-12">
+              <div class="flex justify-start items-center">
+                {/* Checkbox to toggle weekly PnL */}
+                <div className="mb-4">
+                  <Switch size="sm" color="success" isSelected={showWeekPnl} onChange={handleWeekPnlToggle}>
+                    <label class="text-gray-300 font-medium">Show Weekly PnL</label>
+                  </Switch>
+                </div>
+              </div>
+              <div class="flex justify-start items-center">
+                {/* Checkbox to toggle monthly PnL */}
+                <div className="mb-4">
+                  <Switch size="sm" color="success" isSelected={showMonthPnl} onChange={handleMonthPnlToggle}>
+                    <label class="text-gray-300 font-medium">Show Monthly PnL</label>
+                  </Switch>
+                </div>
+              </div>
+              <div class="flex justify-start items-center">
+                {/* Checkbox to background CSS code */}
+                <div>
+                  <Switch size="sm" color="success" isSelected={showRemoveBackCSS} onChange={handleRemoveBackCSS}>
+                    <label class="text-gray-300 font-medium">Remove Background CSS Code</label>
+                  </Switch>
+                </div>
               </div>
             </div>
-            <div class="flex justify-start items-center">
-              {/* Checkbox to toggle monthly PnL */}
-              <div className="mb-4">
-                <label class="flex justify-center items-center text-gray-300 font-medium cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={showMonthPnl}
-                    onChange={handleMonthPnlToggle}
-                    className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md cursor-pointer" />
-                  Show Monthly PnL
-                </label>
+            <div class="w-auto">
+              <div className="flex justify-left items-center">
+                <RadioGroup orientation="horizontal" defaultValue="noplat" onValueChange={setPlatSelected}>
+                  <PlatformRadio className="mr-4" color="success" value="noplat">
+                    <Image 
+                      alt="noplat"
+                      width={"100"}
+                      height={"100"}
+                      className="w-16 h-16 ml-2 object-contain drop-shadow-md"
+                      src={"/noplat.png"}/>
+                  </PlatformRadio>
+                  <PlatformRadio className="mr-4" color="success" value="photon">
+                    <Image 
+                      alt="photon"
+                      width={"100"}
+                      height={"100"}
+                      className="w-16 h-16 ml-2 object-contain drop-shadow-md"
+                      src={"/photon.png"}/>
+                  </PlatformRadio>
+                  <PlatformRadio color="success" value="bullx">
+                    <Image 
+                      alt="bullx"
+                      width={"100"}
+                      height={"100"}
+                      className="w-16 h-16 ml-2 object-contain drop-shadow-md"
+                      src={"/bullx.png"}/>
+                  </PlatformRadio>
+                </RadioGroup>
               </div>
-            </div>
-            <div class="flex justify-start items-center">
-              {/* Checkbox to background CSS code */}
-              <div>
-                <label class="flex justify-center items-center text-gray-300 font-medium cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={showRemoveBackCSS}
-                    onChange={handleRemoveBackCSS}
-                    className="appearance-none bg-[#1F2029] border border-[#343641] rounded-md w-5 h-5 checked:bg-green-500 checked:border-green-500 mr-2 transition-all duration-200 focus:outline-none shadow-md cursor-pointer" />
-                    Remove Background CSS Code
-                </label>
-              </div>
-            </div>
-          </div>
-          <div class="w-auto">
-            <div className="flex justify-left items-center">
-              <RadioGroup orientation="horizontal" defaultValue="noplat" onValueChange={setPlatSelected}>
-                <PlatformRadio className="mr-4" value="noplat">
-                  <Image 
-                    alt="noplat"
-                    width={"100"}
-                    height={"100"}
-                    className="w-16 h-16 -ml-2 object-contain drop-shadow-md"
-                    src={"/noplat.png"}/>
-                </PlatformRadio>
-                <PlatformRadio className="mr-4" value="photon">
-                  <Image 
-                    alt="photon"
-                    width={"100"}
-                    height={"100"}
-                    className="w-16 h-16 -ml-2 object-contain drop-shadow-md"
-                    src={"/photon.png"}/>
-                </PlatformRadio>
-                <PlatformRadio value="bullx">
-                  <Image 
-                    alt="bullx"
-                    width={"100"}
-                    height={"100"}
-                    className="w-16 h-16 -ml-2 object-contain drop-shadow-md"
-                    src={"/bullx.png"}/>
-                </PlatformRadio>
-              </RadioGroup>
             </div>
           </div>
         </div>
       </div>
       {showRemoveBackCSS && (
         <div className="flex justify-center items-center w-full">
-          <div className="flex justify-center items-center bg-[rgba(31,32,41,0.2)] text-white px-8 py-2 rounded-lg shadow-lg mt-4">
+          <div className="flex justify-center items-center bg-[rgba(31,32,41,0.2)] text-white px-8 py-2 mt-8 rounded-lg shadow-lg">
             <RemoveBackCSS/>
           </div>
         </div>
       )}
       {currentPath && walletAddress && walletDetails && (
-        <div className="flex justify-center items-center w-full mt-12">
-          <div className="flex justify-center items-center bg-[rgba(31,32,41,0.2)] text-white px-8 py-2 rounded-lg shadow-lg mt-4">
+        <div className="flex justify-center items-center w-full">
+          <div className="flex justify-center items-center bg-[rgba(31,32,41,0.2)] text-white pl-8 pr-4 py-2 mt-8 rounded-lg shadow-lg">
             {walletDetails}
+            <button onClick={copyToClipboard}
+              className="bg-[#1F2029] text-white hover:bg-[rgba(31,32,41,0.2)] ml-4 py-3 px-3 rounded-md cursor-pointer shadow-md">
+              <svg class="w-[18px] h-[18px] dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"/>
+              </svg>
+            </button>
           </div>
         </div>
       )}
       {walletData ? (
-        <div className="flex justify-center items-center mt-6">
+        <div className="flex justify-center items-center mt-8">
           {todayPnl < 0 && ( 
             <AnimatedBorderTrail trailSize="lg" trailColor="red"> 
               <div className="flex justify-center items-center bg-[#1F2029] text-white max-w-fit px-4 rounded-lg shadow-2xl">
