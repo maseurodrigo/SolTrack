@@ -222,8 +222,11 @@ const WalletTracker = () => {
                   <PlatformRadio className="mr-4" color="success" value="photon">
                     <Image alt="photon" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/photon.png"} priority={false}/>
                   </PlatformRadio>
-                  <PlatformRadio color="success" value="bullx">
+                  <PlatformRadio className="mr-4" color="success" value="bullx">
                     <Image alt="bullx" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/bullx.png"} priority={false}/>
+                  </PlatformRadio>
+                  <PlatformRadio color="success" value="nova">
+                    <Image alt="nova" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/nova.png"} priority={false}/>
                   </PlatformRadio>
                 </RadioGroup>
               </div>
@@ -262,7 +265,7 @@ const WalletTracker = () => {
       {walletData ? (
         <NumberFlowGroup>
           <div className="flex justify-center items-center mt-8">
-            <AnimatedBorderTrail trailSize="lg" trailColor={walletData?.pnl < 0 ? "red" : walletData?.pnl > 0 ? "green" : "white"}> 
+            <AnimatedBorderTrail trailSize="lg" trailColor={walletData?.pnl < 0 ? "red" : walletData?.pnl > 0 ? "green" : "grey"}>
               <div className="flex justify-center items-center bg-[#1F2029] text-white max-w-fit px-4 rounded-lg shadow-2xl">
                 {platSelected && platSelected !== "noplat" && (
                   <div className="flex justify-center items-center text-shadow">
@@ -284,12 +287,12 @@ const WalletTracker = () => {
                       <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow"/>
                     </div>
                   </div>
-                  {walletData?.pnl < 0 && (
+                  {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.pnl).toFixed(2) && walletData?.pnl < 0 && (
                     <div className="flex justify-center items-center text-xs font-medium text-shadow bg-red-100 text-red-800 mt-2 px-4 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
                       <NumberFlow value={calcPnLPerc(walletData?.startingBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                     </div>
                   )}
-                  {walletData?.pnl > 0 && (
+                  {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.pnl).toFixed(2) && walletData?.pnl > 0 && (
                     <div className="flex justify-center items-center text-xs font-medium text-shadow bg-green-100 text-green-800 mt-2 px-4 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
                       <NumberFlow value={calcPnLPerc(walletData?.startingBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                     </div>
@@ -304,12 +307,12 @@ const WalletTracker = () => {
                         <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow"/>
                       </div>
                     </div>
-                    {walletData?.weekPnl < 0 && (
+                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.weekPnl).toFixed(2) && walletData?.weekPnl < 0 && (
                       <div className="flex justify-center items-center text-xs font-medium text-shadow bg-red-100 text-red-800 mt-2 px-4 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
                         <NumberFlow value={calcPnLPerc(walletData?.weekStartBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                       </div>
                     )}
-                    {walletData?.weekPnl > 0 && (
+                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.weekPnl).toFixed(2) && walletData?.weekPnl > 0 && (
                       <div className="flex justify-center items-center text-xs font-medium text-shadow bg-green-100 text-green-800 mt-2 px-4 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
                         <NumberFlow value={calcPnLPerc(walletData?.weekStartBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                       </div>
@@ -325,12 +328,12 @@ const WalletTracker = () => {
                         <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow"/>
                       </div>
                     </div>
-                    {walletData?.monthPnl < 0 && (
+                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.monthPnl).toFixed(2) && walletData?.monthPnl < 0 && (
                       <div className="flex justify-center items-center text-xs font-medium text-shadow bg-red-100 text-red-800 mt-2 px-4 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
                         <NumberFlow value={calcPnLPerc(walletData?.monthStartBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                       </div>
                     )}
-                    {walletData?.monthPnl > 0 && (
+                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.monthPnl).toFixed(2) && walletData?.monthPnl > 0 && (
                       <div className="flex justify-center items-center text-xs font-medium text-shadow bg-green-100 text-green-800 mt-2 px-4 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
                         <NumberFlow value={calcPnLPerc(walletData?.monthStartBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                       </div>
