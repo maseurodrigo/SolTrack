@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import { NextUIProvider } from "@nextui-org/react";
+import { motion } from "motion/react";
 import Head from 'next/head';
 
 import WalletTracker from "./components/WalletTracker";
 
 export default function Home() {
   useEffect(() => {
-    document.body.style.fontFamily = "monaco, Consolas, Lucida Console, monospace";
     document.body.style.backgroundColor = "#282c34";
     document.body.style.color = "#ffffff";
     document.body.style.height = "100vh";
@@ -21,7 +21,9 @@ export default function Home() {
         <meta property="og:title" content="SolTrack" key="title"/>
       </Head>
       <Toaster position="top-center"/>
-      <WalletTracker/>
+      <motion.div className="box">
+        <WalletTracker/>
+      </motion.div>
     </NextUIProvider>
   );
 }

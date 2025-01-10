@@ -1,8 +1,10 @@
-// These styles apply to every route in the application
-import './globals.css'
+import { useEffect } from "react";
+import './globals.css'; // These styles apply to every route in the application
 
-function MyApp({ Component, pageProps }) {
+export default function App({ Component, pageProps }) {
+  useEffect(() => {
+    document.body.style.fontFamily = "monaco, Consolas, Lucida Console, monospace";
+  }, []);
+  
   return <Component {...pageProps} />;
 }
-
-export default MyApp;
