@@ -18,17 +18,13 @@ export default async function checkDbAndGetWallet(wallet) {
       }
     });
 
-    // Disconnect after querying
-    await prisma.$disconnect();
-
     // If no record is found, handle it
     if (!walletData) { console.log("!! walletData findUnique null"); return null; }
 
     // Return the selected fields
     return walletData;
   } catch (error) {
-    await prisma.$disconnect(); // Ensure disconnection on error
-
+    
     console.log("!! Prisma catch: " + error);
 
     return null;

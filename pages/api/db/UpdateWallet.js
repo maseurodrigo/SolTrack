@@ -31,11 +31,8 @@ async function checkDbAndUpdateWeek(wallet, newWeekStartDate, newWeekStartBalanc
                 }
             });
         }
-        
-        // Disconnect Prisma client after the operation
-        await prisma.$disconnect();
     } catch (error) {
-        await prisma.$disconnect(); // Ensure disconnection on error
+        console.log(error);
     }
 }
 
@@ -70,11 +67,8 @@ async function checkDbAndUpdateMonth(wallet, newWeekStartDate, newWeekStartBalan
                 }
             });
         }
-
-        // Disconnect Prisma client after the operation
-        await prisma.$disconnect();
     } catch (error) {
-        await prisma.$disconnect(); // Ensure disconnection on error
+        console.log(error);
     }
 }
 
