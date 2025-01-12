@@ -5,7 +5,7 @@ import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 import Image from 'next/image';
 
 import RemoveBackCSS from './RemoveBackCSS';
-import { PlatformRadio } from "./PlatformRadio";
+import PlatformRadio from './PlatformRadio';
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
 import { calcPnLPerc } from "/utils/calcPnLPercentage";
 

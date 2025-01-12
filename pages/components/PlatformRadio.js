@@ -1,7 +1,7 @@
 import React from "react";
 import { Radio, cn } from "@nextui-org/react";
 
-export const PlatformRadio = (props) => {
+const PlatformRadio = (props) => {
   const { children, ...otherProps } = props;
   return (
     <Radio
@@ -19,3 +19,6 @@ export const PlatformRadio = (props) => {
     </Radio>
   );
 };
+
+// Default export the component
+export default PlatformRadio;
