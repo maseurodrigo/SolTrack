@@ -5,6 +5,8 @@ export default async function checkDbAndGetWallet(wallet) {
     // Test the Prisma DB connection
     await prisma.$connect();
 
+    console.log("!! Prisma.userdata: " + prisma.userdata);
+
     // Find the record by wallet (primary key)
     const walletData = await prisma.userdata.findUnique({
       where: { wallet: wallet }, // The wallet parameter passed to the function
@@ -20,12 +22,15 @@ export default async function checkDbAndGetWallet(wallet) {
     await prisma.$disconnect();
 
     // If no record is found, handle it
-    if (!walletData) { return null; }
+    if (!walletData) { console.log("!! walletData findUnique null"); return null; }
 
     // Return the selected fields
     return walletData;
   } catch (error) {
     await prisma.$disconnect(); // Ensure disconnection on error
+
+    console.log("!! Prisma catch: " + error);
+
     return null;
   }
 }

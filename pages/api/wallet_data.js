@@ -17,6 +17,8 @@ export default async function handler(req, res) {
       // Fetch wallet data from the database
       const walletData = await checkDbAndGetWallet(wallet);
 
+      console.log("! wallet_data await: " + walletData);
+
       // If wallet data is not found, initialize with default values
       if (!walletData) {
         userData[wallet] = {
