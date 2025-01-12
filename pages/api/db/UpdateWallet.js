@@ -6,33 +6,34 @@ async function checkDbAndUpdateWeek(wallet, newWeekStartDate, newWeekStartBalanc
         await prisma.$connect();
 
         // Check if the wallet entry exists by its primary key (wallet)
-        const walletData = await prisma.userdata.findUnique({
+        const walletData = await prisma.UserData.findUnique({
             where: { wallet: wallet } // Using the wallet as the primary key
         });
 
         // If wallet entry exists, update the weekStartDate
         if (walletData) {
-            await prisma.userdata.update({
+            await prisma.UserData.update({
                 where: { wallet: wallet }, // Primary key to find the entry
                 data: {
-                    week_start_date: newWeekStartDate, // Update week_start_date
-                    week_start_balance: newWeekStartBalance // Update week_start_balance
+                    weekStartDate: newWeekStartDate, // Update week_start_date
+                    weekStartBalance: newWeekStartBalance // Update week_start_balance
                 }
             });
         } else {
             // If wallet entry doesn't exist, create a new entry with the provided data
-            await prisma.userdata.create({
+            await prisma.UserData.create({
                 data: {
                     wallet: wallet, // Wallet identifier
-                    week_start_date: newWeekStartDate, // Set initial week_start_date
-                    week_start_balance: newWeekStartBalance, // Set initial week_start_balance
-                    month_start_date: newMonthStartDate, // Set initial month_start_date
-                    month_start_balance: newMonthStartBalance // Set initial month_start_balance
+                    weekStartDate: newWeekStartDate, // Set initial week_start_date
+                    weekStartBalance: newWeekStartBalance, // Set initial week_start_balance
+                    monthStartDate: newMonthStartDate, // Set initial month_start_date
+                    monthStartBalance: newMonthStartBalance // Set initial month_start_balance
                 }
             });
         }
     } catch (error) {
-        console.log(error);
+        console.error('Error updating week:', error);
+        throw error;
     }
 }
 
@@ -42,33 +43,34 @@ async function checkDbAndUpdateMonth(wallet, newWeekStartDate, newWeekStartBalan
         await prisma.$connect();
 
         // Check if the wallet entry exists by its primary key (wallet)
-        const walletData = await prisma.userdata.findUnique({
+        const walletData = await prisma.UserData.findUnique({
             where: { wallet: wallet } // Using the wallet as the primary key
         });
 
         // If wallet entry exists, update the weekStartDate
         if (walletData) {
-            await prisma.userdata.update({
+            await prisma.UserData.update({
                 where: { wallet: wallet }, // Primary key to find the entry
                 data: {
-                    month_start_date: newMonthStartDate, // Update week_start_date
-                    month_start_balance: newMonthStartBalance // Update week_start_balance
+                    monthStartDate: newMonthStartDate, // Update week_start_date
+                    monthStartBalance: newMonthStartBalance // Update week_start_balance
                 }
             });
         } else {
             // If wallet entry doesn't exist, create a new entry with the provided data
-            await prisma.userdata.create({
+            await prisma.UserData.create({
                 data: {
                     wallet: wallet, // Wallet identifier
-                    week_start_date: newWeekStartDate, // Set initial week_start_date
-                    week_start_balance: newWeekStartBalance, // Set initial week_start_balance
-                    month_start_date: newMonthStartDate, // Set initial month_start_date
-                    month_start_balance: newMonthStartBalance // Set initial month_start_balance
+                    weekStartDate: newWeekStartDate, // Set initial week_start_date
+                    weekStartBalance: newWeekStartBalance, // Set initial week_start_balance
+                    monthStartDate: newMonthStartDate, // Set initial month_start_date
+                    monthStartBalance: newMonthStartBalance // Set initial month_start_balance
                 }
             });
         }
     } catch (error) {
-        console.log(error);
+        console.error('Error updating month:', error);
+        throw error;
     }
 }
 

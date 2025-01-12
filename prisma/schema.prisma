@@ -8,9 +8,9 @@ datasource db {
 }
 
 model UserData {
-  wallet              String   @id
-  week_start_date     DateTime
-  week_start_balance  Float    @db.Real
-  month_start_date    DateTime
-  month_start_balance Float    @db.Real
+  wallet            String   @id
+  weekStartDate     DateTime @map("week_start_date")
+  weekStartBalance  Float    @map("week_start_balance") @db.Real
+  monthStartDate    DateTime @map("month_start_date")
+  monthStartBalance Float    @map("month_start_balance") @db.Real
 }
