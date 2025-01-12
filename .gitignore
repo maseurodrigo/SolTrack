@@ -36,3 +36,9 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 .next
+
+# Enviroment Variables
+.env
+.env.example
+.env.local
+.env.staging

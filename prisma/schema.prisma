@@ -1,0 +1,16 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserData {
+  wallet              String   @id
+  week_start_date     DateTime
+  week_start_balance  Float    @db.Real
+  month_start_date    DateTime
+  month_start_balance Float    @db.Real
+}

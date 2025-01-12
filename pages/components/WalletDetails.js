@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
+import { calcPnLPerc } from "/utils/calcPnLPercentage";
 
 export default function WalletDetails() {
     const router = useRouter();
@@ -34,39 +35,21 @@ export default function WalletDetails() {
     useEffect(() => {
         // Poll for wallet data every 5 seconds
         if (locWalletAddress) {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`/api/wallet_data?wallet=${locWalletAddress}`);
-                const data = await response.json();
-                setWalletData(data);
-            } catch (error) {
-                toast.error(error); 
-            }
-        };
+            const fetchData = async () => {
+                try {
+                    const response = await fetch(`/api/wallet_data?wallet=${locWalletAddress}`);
+                    const data = await response.json();
+                    setWalletData(data);
+                } catch (error) {
+                    toast.error(error); 
+                }
+            };
 
-        fetchData();
-        const interval = setInterval(fetchData, 5000);
-        return () => clearInterval(interval); // Cleanup interval
-      }
-    }, [locWalletAddress]);
-
-    const calcPnLPerc = (num1, num2) => {
-        if (num1 && num2 !== undefined) {
-
-            // Handle edge case where starting value is 0
-            if (parseFloat(num1) === 0) {
-                return parseFloat(num2) === 0 ? 0 : (value2 > 0 ? Infinity : -Infinity);
-            }
-
-            // No currentBalance cases
-            if (parseFloat(num2) === 0) { return -1; }
-
-            // Calculate relative difference, rounded to 2 decimals
-            return (((parseFloat(num2) - parseFloat(num1)) / Math.abs(parseFloat(num1)))).toFixed(2);
-        } else {
-            return 0;
+            fetchData();
+            const interval = setInterval(fetchData, 5000);
+            return () => clearInterval(interval); // Cleanup interval
         }
-    };
+    }, [locWalletAddress]);
     
     return (
         <>

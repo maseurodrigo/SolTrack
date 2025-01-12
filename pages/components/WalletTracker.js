@@ -5,26 +5,9 @@ import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 import Image from 'next/image';
 
 import RemoveBackCSS from './RemoveBackCSS';
+import { PlatformRadio } from "./PlatformRadio";
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
-
-export const PlatformRadio = (props) => {
-  const {children, ...otherProps} = props;
-  return (
-    <Radio
-      {...otherProps}
-      classNames={{
-        base: cn(
-          "flex justify-center items-center",
-          "rounded-lg bg-[#1F2029] border border-[#343641]",
-          "px-4 py-2 max-w-[300px] transition-all duration-200 cursor-pointer",
-          "data-[selected=true]:outline-none data-[selected=true]:ring-1 data-[selected=true]:ring-opacity-50 data-[selected=true]:ring-green-800 data-[selected=true]:shadow-lg"
-        ),
-      }}
-    >
-      {children}
-    </Radio>
-  );
-};
+import { calcPnLPerc } from "/utils/calcPnLPercentage";
 
 const WalletTracker = () => {
   const [walletData, setWalletData] = useState(null);
@@ -38,24 +21,17 @@ const WalletTracker = () => {
   const [platSelected, setPlatSelected] = useState(""); // State to toggle selected platform
   const [currentPath, setCurrentPath] = useState(""); // Get the current URL as a string
 
-  // Function to track shown error messages
-  const shownErrors = new Set();
+  const shownErrors = new Set(); // Function to track shown error messages
+  const backCSSRef = useRef(null); // Reference to access DOM element rendered by RemoveBackCSS
 
-  // Reference to access DOM element rendered by RemoveBackCSS
-  const backCSSRef = useRef(null);
-
-  const hasShownError = (errorMessage) => {
-    return shownErrors.has(errorMessage);
-  };
-
-  const setHasShownError = (errorMessage) => {
-    shownErrors.add(errorMessage);
-  };
+  const setHasShownError = (errorMessage) => { shownErrors.add(errorMessage); };
+  const hasShownError = (errorMessage) => { return shownErrors.has(errorMessage); };
 
   const fetchData = async () => {
     try {
       // If theres no wallet address, don't proceed
-      if (!walletAddress) {  
+      if (!walletAddress)
+      {
         // Check if error message has already been shown using the Set
         if (!hasShownError("Wallet address required")) {
           toast.error("Wallet address required");
@@ -90,29 +66,24 @@ const WalletTracker = () => {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setCurrentPath(window.location.href); // Access window object
-    }
+    // Access window object
+    if (typeof window !== 'undefined') { setCurrentPath(window.location.href); }
   }, []);
 
   useEffect(() => {
     shownErrors.clear();  // Clear errors when walletAddress changes
 
-    if (walletAddress) {
-      fetchData(); // Fetch data when walletAddress changes
-    }
+    // Fetch data when walletAddress changes
+    if (walletAddress) { fetchData(); }
     
     // Set up the interval
-    const interval = setInterval(() => {
-      fetchData();
-    }, 5000);
+    const interval = setInterval(() => { fetchData(); }, 5000);
 
     return () => clearInterval(interval);
   }, [walletAddress]); // Re-fetch when walletAddress or options change
 
-  const handleWalletAddressChange = (event) => {
-    setInputAddress(event.target.value); // Update input value
-  };
+  // Update input value
+  const handleWalletAddressChange = (event) => { setInputAddress(event.target.value); };
 
   useEffect(() => {
     const walletData = { walletAddress, pageFontSize, showWeekPnl, showMonthPnl, platSelected };
@@ -129,17 +100,14 @@ const WalletTracker = () => {
     setWalletAddress(inputAddress); // Set the wallet address from the form input
   };
 
-  const handleWeekPnlToggle = () => {
-    setShowWeekPnl((prev) => !prev); // Toggle weekly PnL
-  };
+  // Toggle weekly PnL
+  const handleWeekPnlToggle = () => { setShowWeekPnl((prev) => !prev); };
 
-  const handleMonthPnlToggle = () => {
-    setShowMonthPnl((prev) => !prev); // Toggle monthly PnL
-  };
+  // Toggle monthly PnL
+  const handleMonthPnlToggle = () => { setShowMonthPnl((prev) => !prev); };
 
-  const handleRemoveBackCSS = () => {
-    setRemoveBackCSS((prev) => !prev); // Toggle background CSS code
-  };
+  // Toggle background CSS code
+  const handleRemoveBackCSS = () => { setRemoveBackCSS((prev) => !prev); };
 
   const copyBackCSSToClipboard = () => {
     navigator.clipboard.writeText(backCSSRef.current.textContent); // Copies backCSSRef text to clipboard
@@ -150,24 +118,6 @@ const WalletTracker = () => {
     navigator.clipboard.writeText(walletDetails); // Copies walletDetails URL to clipboard
     toast.success("Widget URL copied to clipboard");
   }
-
-  const calcPnLPerc = (num1, num2) => {
-    if (num1 && num2 !== undefined) {
-
-      // Handle edge case where starting value is 0
-      if (parseFloat(num1) === 0) {
-        return parseFloat(num2) === 0 ? 0 : (value2 > 0 ? Infinity : -Infinity);
-      }
-
-      // No currentBalance cases
-      if (parseFloat(num2) === 0) { return -1; }
-
-      // Calculate relative difference, rounded to 2 decimals
-      return (((parseFloat(num2) - parseFloat(num1)) / Math.abs(parseFloat(num1)))).toFixed(2);
-    } else {
-      return 0;
-    }
-  };
 
   return (
     <div className="pt-24">
