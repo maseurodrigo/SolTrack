@@ -1,3 +1,21 @@
+/*
+  * Prisma Schema
+  * 
+  * Generator:
+  * - Client: `prisma-client-js` for TypeScript/JavaScript
+  * 
+  * Data Source:
+  * - PostgreSQL, connection via `DATABASE_URL` environment variable
+  * 
+  * Model: UserData
+  * - `wallet`: Primary Key
+  * - `weekStartDate` & `monthStartDate`: Track week/month start dates
+  * - `weekStartBalance` & `monthStartBalance`: Balances at week/month start (PostgreSQL Real type)
+  * 
+  * Notes:
+  * - Use `@map` for custom database column names
+*/
+
 generator client {
   provider = "prisma-client-js"
 }

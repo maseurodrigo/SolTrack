@@ -61,7 +61,6 @@ To run this project, ensure you have the following installed:
    Run the following commands to set up Prisma:
 
    ```bash
-   npx prisma init
    npx prisma db push
    npx prisma generate
    ```
