@@ -19,7 +19,7 @@ function PulsingIndicator({ position, value }) {
   return (
     <mesh position={position}>
       <sphereGeometry args={[0.5, 32, 32]} />
-      <meshStandardMaterial color={color} transparent emissive={color} emissiveIntensity={1}/>
+      <meshStandardMaterial color={color} transparent emissive={color} emissiveIntensity={0.8}/>
     </mesh>
   );
 }
