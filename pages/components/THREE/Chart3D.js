@@ -122,10 +122,10 @@ function LineChart({ data }) {
   );
 }
 
-export default function Chart3D({ data }) {
+export default function Chart3D({ data = [] }) {
   // Calculate the maximum absolute value from the data
-  const maxAbsValue = Math.max(...data.map(point => Math.abs(point.value)));
-
+  const maxAbsValue = Math.max(...((Array.isArray(data) && data.length > 0) ? data.map(point => (typeof point === 'object' && point !== null && 'value' in point) ? Math.abs(point.value) : 0) : [0]));
+  
   // Calculate dynamic camera position based on the data range
   const cameraDistance = Math.max(50, maxAbsValue * 2.5); // Minimum distance of 50
   const cameraHeight = Math.max(20, maxAbsValue * 1.5); // Minimum height of 20
@@ -137,7 +137,7 @@ export default function Chart3D({ data }) {
       {/* Main directional light for general scene illumination */}
       <directionalLight position={[50, 50, 25]} intensity={0.9} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-camera-far={100} shadow-camera-left={-50} shadow-camera-right={50} shadow-camera-top={50} shadow-camera-bottom={-50}/>
       {/* Soft fill light */}
-      <pointLight position={[-10, 20, -20]} intensity={0.5} />
+      <pointLight position={[-10, 20, -20]} intensity={0.3} />
       <LineChart data={data} />
       <OrbitControls enableZoom={true} />
     </Canvas>
