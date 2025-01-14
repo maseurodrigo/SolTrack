@@ -1,10 +1,9 @@
-import { React, useEffect, useState } from "react";
+import { React, useEffect, useState, useRef } from "react";
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/router';
 import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
-import IconRipple from './animata/container/icon-ripple.tsx';
 import { calcPnLPerc } from "/utils/calcPnLPercentage";
 import Chart3D from './THREE/Chart3D.js';
 
@@ -14,9 +13,12 @@ export default function WalletDetails() {
     const [walletData, setWalletData] = useState(null);
     const [walletConfig, setWalletConfig] = useState(null);
     const [tradeData, setTradeData] = useState([]);
-    const [isChartVisible, setIsChartVisible] = useState(false); // Controls visibility
-    const [renderChartData, setRenderChartData] = useState(false); // Controls rendering
+    const [renderChartData, setRenderChartData] = useState(false); // State for PnL chart rendering
+    const [isChartVisible, setIsChartVisible] = useState(false); // State for PnL chart visibility
 
+    const isProcessingChartRef = useRef(false); // To track if the PnL chart function is already running
+    const timerChartRef = useRef(null); // To track the PnL chart timer
+    
     useEffect(() => {
         if (router.isReady) {
             const { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, chartEnabled, platSelected } = router.query;
@@ -81,20 +83,34 @@ export default function WalletDetails() {
     }, [walletData]);
 
     useEffect(() => {
-        if (tradeData.length > 1) {
+        // Check if tradeData.length is a positive multiple of 10
+        if (tradeData.length > 1 && tradeData.length % 10 === 0) {
+            // If already processing, do nothing
+            if (isProcessingChartRef.current) return;
+
+            isProcessingChartRef.current = true; // Mark as processing
             setRenderChartData(true); // Start rendering the chart
             setTimeout(() => setIsChartVisible(true), 0); // Trigger fade-in effect
 
-            const timer = setTimeout(() => {
+            // Start the timer
+            timerChartRef.current = setTimeout(() => {
                 setIsChartVisible(false); // Start fade-out effect
-                setTimeout(() => setRenderChartData(false), 1000); // Remove from DOM after fade-out
+                setTimeout(() => {
+                    setRenderChartData(false); // Remove from DOM after fade-out
+                    isProcessingChartRef.current = false; // Mark as done
+                }, 1000);
             }, 6000);
 
             // Clean up the timer when tradeData changes or component unmounts
-            return () => clearTimeout(timer);
+            return () => {
+                if (timerChartRef.current) {
+                    clearTimeout(timerChartRef.current);
+                    isProcessingChartRef.current = false; // Reset processing state on cleanup
+                }
+            };
         }
     }, [tradeData]);
-
+    
     return (
         <>
             {walletConfig && walletData ? (
@@ -111,7 +127,7 @@ export default function WalletDetails() {
                                     <div className={`${walletConfig.widgetFontSize} text-center uppercase text-gray-500 tracking-wider text-shadow-sm mb-2`}>BALANCE</div>
                                     <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                                         <NumberFlow value={walletData.currentBalance} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }}/>
-                                        <IconRipple borderColor={walletData?.pnl < 0 ? "#ef4444" : walletData?.pnl > 0 ? "#22c55e" : "#6b7280"} inset="0px"/>
+                                        <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter ml-4 drop-shadow"/>
                                     </div>
                                 </div>
                                 <div className={`flex flex-col justify-center items-center text-9xl ${walletConfig.widgetPaddingSize} ${walletData?.pnl > 0 ? 'text-emerald-500' : walletData?.pnl < 0 ? 'text-red-500' : 'text-white'}`}>

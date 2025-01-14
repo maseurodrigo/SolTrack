@@ -6,7 +6,6 @@ import Image from 'next/image';
 
 import RemoveBackCSS from './RemoveBackCSS';
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
-import IconRipple from './animata/container/icon-ripple.tsx';
 import { calcPnLPerc } from "/utils/calcPnLPercentage";
 
 export const PlatformRadio = (props) => {
@@ -219,7 +218,7 @@ const WalletTracker = () => {
                 {/* Checkbox to toggle PnL chart visibility */}
                 <div className="mb-4">
                   <Switch size="sm" color="success" isSelected={chartEnabled} onChange={handleChartVisibility}>
-                    <label className="text-gray-300 font-medium">Show PnL Chart</label>
+                    <label className="text-gray-300 font-medium">Show PnL Chart (Every 10 Trades)</label>
                   </Switch>
                 </div>
               </div>
@@ -295,7 +294,7 @@ const WalletTracker = () => {
                   <div className={`${widgetFontSize} uppercase text-gray-500 tracking-wider text-shadow-sm mb-2`}>BALANCE</div>
                   <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                     <NumberFlow value={walletData.currentBalance} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }}/>
-                    <IconRipple borderColor={walletData?.pnl < 0 ? "#ef4444" : walletData?.pnl > 0 ? "#22c55e" : "#6b7280"} inset="0px"/>
+                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter ml-4 drop-shadow"/>
                   </div>
                 </div>
                 <div className={`flex flex-col justify-center items-center text-9xl ${widgetPaddingSize} ${walletData?.pnl > 0 ? 'text-emerald-500' : walletData?.pnl < 0 ? 'text-red-500' : 'text-white'}`}>

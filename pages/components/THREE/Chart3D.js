@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Text } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 function PulsingIndicator({ position, value }) {
@@ -21,44 +21,6 @@ function PulsingIndicator({ position, value }) {
       <sphereGeometry args={[0.5, 32, 32]} />
       <meshStandardMaterial color={color} transparent emissive={color} emissiveIntensity={0.5}/>
     </mesh>
-  );
-}
-
-function Axes({ maxValue, minValue }) {
-  // Calculate nice round numbers for the axis
-  const range = maxValue - minValue;
-  const step = Math.pow(10, Math.floor(Math.log10(range))) / 2;
-  const start = Math.floor(minValue / step) * step;
-  const end = Math.ceil(maxValue / step) * step;
-  const steps = Math.ceil((end - start) / step);
-
-  return (
-    <group>
-      {/* Y-axis */}
-      <line>
-        <bufferGeometry attach="geometry" {...new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-25, minValue * 2, 0), new THREE.Vector3(-25, maxValue * 2, 0)])}/>
-        <lineBasicMaterial attach="material" color="#666666"/>
-      </line>
-      <Text position={[-25, maxValue * 2 + 1, 0]} color="#666666" fontSize={1.5} anchorX="center">
-        PnL (SOL)
-      </Text>
-
-      {/* Y-axis markers */}
-      {Array.from({ length: steps + 1 }, (_, i) => {
-        const value = start + i * step;
-        return (
-          <group key={i}>
-            <Text position={[-26, value * 2, 0]} color="#666666" fontSize={1} anchorX="right">
-              {value.toFixed(1)}
-            </Text>
-            <line>
-              <bufferGeometry attach="geometry" {...new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-25.5, value * 2, 0), new THREE.Vector3(-24.5, value * 2, 0)])}/>
-              <lineBasicMaterial attach="material" color="#666666"/>
-            </line>
-          </group>
-        );
-      })}
-    </group>
   );
 }
 
@@ -145,7 +107,6 @@ function LineChart({ data }) {
   return (
     <group>
       <DynamicCamera maxValue={maxValue} minValue={minValue} />
-      <Axes maxValue={maxValue} minValue={minValue} />
       {/* Gradient fill */}
       <mesh>
         <bufferGeometry attach="geometry" {...fillGeometry} />
@@ -162,10 +123,21 @@ function LineChart({ data }) {
 }
 
 export default function Chart3D({ data }) {
+  // Calculate the maximum absolute value from the data
+  const maxAbsValue = Math.max(...data.map(point => Math.abs(point.value)));
+
+  // Calculate dynamic camera position based on the data range
+  const cameraDistance = Math.max(50, maxAbsValue * 2.5); // Minimum distance of 50
+  const cameraHeight = Math.max(20, maxAbsValue * 1.5); // Minimum height of 20
+
   return (
-    <Canvas camera={{ position: [0, 0, 20], fov: 75 }} className="w-full h-full">
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} />
+    <Canvas camera={{ position: [0, cameraHeight, cameraDistance], fov: 75 }} className="w-full h-full">
+      {/* Reduced ambient light for more dramatic effect */}
+      <ambientLight intensity={0.3} />
+      {/* Main directional light for general scene illumination */}
+      <directionalLight position={[50, 50, 25]} intensity={0.9} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-camera-far={100} shadow-camera-left={-50} shadow-camera-right={50} shadow-camera-top={50} shadow-camera-bottom={-50}/>
+      {/* Soft fill light */}
+      <pointLight position={[-10, 20, -20]} intensity={0.5} />
       <LineChart data={data} />
       <OrbitControls enableZoom={true} />
     </Canvas>
