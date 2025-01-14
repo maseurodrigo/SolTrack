@@ -6,6 +6,7 @@ import Image from 'next/image';
 
 import RemoveBackCSS from './RemoveBackCSS';
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
+import IconRipple from './animata/container/icon-ripple.tsx';
 import { calcPnLPerc } from "/utils/calcPnLPercentage";
 
 export const PlatformRadio = (props) => {
@@ -36,6 +37,7 @@ const WalletTracker = () => {
   const [widgetFontSize, setWidgetFontSize] = useState("text-sm"); // State to set widget font sizes
   const [showWeekPnl, setShowWeekPnl] = useState(false); // State to toggle weekly PnL
   const [showMonthPnl, setShowMonthPnl] = useState(false); // State to toggle monthly PnL
+  const [chartEnabled, setChartEnabled] = useState(false); // State to toggle PnL chart
   const [showRemoveBackCSS, setRemoveBackCSS] = useState(false); // State to toggle background CSS code
   const [platSelected, setPlatSelected] = useState(""); // State to toggle selected platform
   const [currentPath, setCurrentPath] = useState(""); // Get the current URL as a string
@@ -105,14 +107,14 @@ const WalletTracker = () => {
   const handleWalletAddressChange = (event) => { setInputAddress(event.target.value); };
 
   useEffect(() => {
-    const walletData = { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, platSelected };
+    const walletData = { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, chartEnabled, platSelected };
 
     // Convert data to query parameters for new tab navigation
     const queryParams = new URLSearchParams(walletData).toString();
 
     // Store URL with the data passed as query params
     setWalletDetails(`${currentPath}components/WalletDetails?${queryParams}`);
-  }, [walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, platSelected]); // Re-fetch when walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl or platSelected change
+  }, [walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, chartEnabled, platSelected]); // Re-fetch when walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, chartEnabled or platSelected change
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -124,6 +126,9 @@ const WalletTracker = () => {
 
   // Toggle monthly PnL
   const handleMonthPnlToggle = () => { setShowMonthPnl((prev) => !prev); };
+
+  // Toggle PnL chart visibility
+  const handleChartVisibility = () => { setChartEnabled((prev) => !prev); };
 
   // Toggle background CSS code
   const handleRemoveBackCSS = () => { setRemoveBackCSS((prev) => !prev); };
@@ -211,6 +216,14 @@ const WalletTracker = () => {
                 </div>
               </div>
               <div className="flex justify-start items-center">
+                {/* Checkbox to toggle PnL chart visibility */}
+                <div className="mb-4">
+                  <Switch size="sm" color="success" isSelected={chartEnabled} onChange={handleChartVisibility}>
+                    <label className="text-gray-300 font-medium">Show PnL Chart</label>
+                  </Switch>
+                </div>
+              </div>
+              <div className="flex justify-start items-center">
                 {/* Checkbox to background CSS code */}
                 <div>
                   <Switch size="sm" color="success" isSelected={showRemoveBackCSS} onChange={handleRemoveBackCSS}>
@@ -282,7 +295,7 @@ const WalletTracker = () => {
                   <div className={`${widgetFontSize} uppercase text-gray-500 tracking-wider text-shadow-sm mb-2`}>BALANCE</div>
                   <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                     <NumberFlow value={walletData.currentBalance} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }}/>
-                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                    <IconRipple borderColor={walletData?.pnl < 0 ? "#ef4444" : walletData?.pnl > 0 ? "#22c55e" : "#6b7280"} inset="0px"/>
                   </div>
                 </div>
                 <div className={`flex flex-col justify-center items-center text-9xl ${widgetPaddingSize} ${walletData?.pnl > 0 ? 'text-emerald-500' : walletData?.pnl < 0 ? 'text-red-500' : 'text-white'}`}>

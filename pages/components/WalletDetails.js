@@ -4,17 +4,22 @@ import { useRouter } from 'next/router';
 import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
+import IconRipple from './animata/container/icon-ripple.tsx';
 import { calcPnLPerc } from "/utils/calcPnLPercentage";
+import Chart3D from './THREE/Chart3D.js';
 
 export default function WalletDetails() {
     const router = useRouter();
     const [locWalletAddress, setLocWalletAddress] = useState(""); // State for wallet address input
     const [walletData, setWalletData] = useState(null);
     const [walletConfig, setWalletConfig] = useState(null);
+    const [tradeData, setTradeData] = useState([]);
+    const [isChartVisible, setIsChartVisible] = useState(false); // Controls visibility
+    const [renderChartData, setRenderChartData] = useState(false); // Controls rendering
 
     useEffect(() => {
         if (router.isReady) {
-            const { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, platSelected } = router.query;
+            const { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, chartEnabled, platSelected } = router.query;
             setLocWalletAddress(walletAddress); // Set the wallet address from URL
 
             if (walletAddress) {
@@ -24,6 +29,7 @@ export default function WalletDetails() {
                     widgetFontSize: widgetFontSize?.toLowerCase(),
                     showWeekPnl: showWeekPnl?.toLowerCase() === 'true', // Convert to boolean
                     showMonthPnl: showMonthPnl?.toLowerCase() === 'true', // Convert to boolean
+                    chartEnabled: chartEnabled?.toLowerCase() === 'true', // Convert to boolean
                     platSelected: platSelected?.toLowerCase()
                 });
             } else {
@@ -51,12 +57,49 @@ export default function WalletDetails() {
             return () => clearInterval(interval); // Cleanup interval
         }
     }, [locWalletAddress]);
-    
+
+    useEffect(() => {
+        if (walletData?.pnl !== undefined) {
+            // Single trade data
+            const newTradeData = { timestamp: Date.now(), value: walletData?.pnl };
+
+            // Append new data to the existing tradeData state with checks
+            setTradeData((prevTradeData) => {
+                // If tradeData is empty, append all new data
+                if (prevTradeData.length === 0) { return [newTradeData]; }
+
+                // If tradeData is not empty, check the last value
+                const lastValue = prevTradeData[prevTradeData.length - 1];
+                if (lastValue.value === newTradeData.value) {
+                    return prevTradeData; // If the last value is the same as the new entry, do nothing
+                }
+
+                // If it's different append the new entry
+                return [...prevTradeData, newTradeData];
+            });
+        }
+    }, [walletData]);
+
+    useEffect(() => {
+        if (tradeData.length > 1) {
+            setRenderChartData(true); // Start rendering the chart
+            setTimeout(() => setIsChartVisible(true), 0); // Trigger fade-in effect
+
+            const timer = setTimeout(() => {
+                setIsChartVisible(false); // Start fade-out effect
+                setTimeout(() => setRenderChartData(false), 1000); // Remove from DOM after fade-out
+            }, 6000);
+
+            // Clean up the timer when tradeData changes or component unmounts
+            return () => clearTimeout(timer);
+        }
+    }, [tradeData]);
+
     return (
         <>
             {walletConfig && walletData ? (
                 <NumberFlowGroup>
-                    <div className="flex justify-center items-center mt-12">
+                    <div className="fixed bottom-0 left-0 w-full flex justify-center items-center mb-12">
                         <AnimatedBorderTrail trailSize="lg" trailColor={walletData?.pnl < 0 ? "red" : walletData?.pnl > 0 ? "green" : "white"}>
                             <div className="flex justify-center items-center bg-[#1F2029] text-white max-w-fit px-4 rounded-lg shadow-2xl">
                                 {walletConfig.platSelected && walletConfig.platSelected !== "noplat" && (
@@ -68,7 +111,7 @@ export default function WalletDetails() {
                                     <div className={`${walletConfig.widgetFontSize} text-center uppercase text-gray-500 tracking-wider text-shadow-sm mb-2`}>BALANCE</div>
                                     <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                                         <NumberFlow value={walletData.currentBalance} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }}/>
-                                        <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 ml-4 filter drop-shadow"/>
+                                        <IconRipple borderColor={walletData?.pnl < 0 ? "#ef4444" : walletData?.pnl > 0 ? "#22c55e" : "#6b7280"} inset="0px"/>
                                     </div>
                                 </div>
                                 <div className={`flex flex-col justify-center items-center text-9xl ${walletConfig.widgetPaddingSize} ${walletData?.pnl > 0 ? 'text-emerald-500' : walletData?.pnl < 0 ? 'text-red-500' : 'text-white'}`}>
@@ -135,6 +178,12 @@ export default function WalletDetails() {
                             </div>
                         </AnimatedBorderTrail>
                     </div>
+                    {/* Conditionally render Chart3D with fade effects */}
+                    {walletConfig.chartEnabled && renderChartData && (
+                        <div className={`fixed top-0 left-0 w-screen h-screen bg-[#0a0a0a] bg-opacity-90 transition-opacity duration-1000 ${ isChartVisible ? "opacity-100" : "opacity-0"}`}>
+                            <Chart3D data={tradeData} />
+                        </div>
+                    )}
                 </NumberFlowGroup>
             ) : (
                 <></>
