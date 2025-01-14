@@ -218,7 +218,7 @@ const WalletTracker = () => {
                 {/* Checkbox to toggle PnL chart visibility */}
                 <div className="mb-4">
                   <Switch size="sm" color="success" isSelected={chartEnabled} onChange={handleChartVisibility}>
-                    <label className="text-gray-300 font-medium">Show PnL Chart (Every 10 Trades)</label>
+                    <label className="text-gray-300 font-medium">BETA: Show PnL Chart (Every 10 Trades)</label>
                   </Switch>
                 </div>
               </div>

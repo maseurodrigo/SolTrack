@@ -19,7 +19,7 @@ function PulsingIndicator({ position, value }) {
   return (
     <mesh position={position}>
       <sphereGeometry args={[0.5, 32, 32]} />
-      <meshStandardMaterial color={color} transparent emissive={color} emissiveIntensity={0.5}/>
+      <meshStandardMaterial color={color} transparent emissive={color} emissiveIntensity={1}/>
     </mesh>
   );
 }
@@ -66,18 +66,29 @@ function LineChart({ data }) {
     fillPoints.push(new THREE.Vector3(x, y, z));
     fillPoints.push(new THREE.Vector3(x, 0, z));
 
-    // Calculate color based on y value
+    const gradientFactor = Math.pow(i / (data.length - 1), 1.5); // Exponential gradient
+
     if (y >= 0) {
-      const intensity = Math.min(y / 20, 1);
-      colors.push(0, 1 * intensity, 0.53 * intensity);
-      
+      const baseIntensity = Math.min(y / 20, 1);
+      const intensity = baseIntensity * (0.3 + 0.7 * gradientFactor); // Minimum 30% brightness
+      colors.push(
+        0,                    // R
+        1 * intensity,        // G: Brighter green towards the end
+        0.53 * intensity     // B: Slight blue for glow
+      );
+
       // Add colors for both vertices of the fill (top and bottom)
       fillColors.push(0, 1 * intensity, 0.53 * intensity);
       fillColors.push(0, 0.2 * intensity, 0.1 * intensity);
     } else {
-      const intensity = Math.min(Math.abs(y) / 20, 1);
-      colors.push(1 * intensity, 0, 0);
-      
+      const baseIntensity = Math.min(Math.abs(y) / 20, 1);
+      const intensity = baseIntensity * (0.3 + 0.7 * gradientFactor); // Minimum 30% brightness
+      colors.push(
+        1 * intensity,        // R: Brighter red towards the end
+        0,                    // G
+        0                     // B
+      );
+
       // Add colors for both vertices of the fill (top and bottom)
       fillColors.push(1 * intensity, 0, 0);
       fillColors.push(0.2 * intensity, 0, 0);
@@ -103,7 +114,7 @@ function LineChart({ data }) {
   fillGeometry.setFromPoints(fillPoints);
   fillGeometry.setAttribute('color', new THREE.Float32BufferAttribute(fillColors, 3));
   fillGeometry.setIndex(fillIndices);
-
+  
   return (
     <group>
       <DynamicCamera maxValue={maxValue} minValue={minValue} />
@@ -132,12 +143,22 @@ export default function Chart3D({ data = [] }) {
 
   return (
     <Canvas camera={{ position: [0, cameraHeight, cameraDistance], fov: 75 }} className="w-full h-full">
-      {/* Reduced ambient light for more dramatic effect */}
-      <ambientLight intensity={0.3} />
-      {/* Main directional light for general scene illumination */}
-      <directionalLight position={[50, 50, 25]} intensity={0.9} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-camera-far={100} shadow-camera-left={-50} shadow-camera-right={50} shadow-camera-top={50} shadow-camera-bottom={-50}/>
+      {/* Ambient light for overall scene illumination */}
+      <ambientLight intensity={0.4} />
+      {/* Main directional light */}
+      <directionalLight 
+        position={[50, 50, 25]}
+        intensity={0.8}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-far={100}
+        shadow-camera-left={-50}
+        shadow-camera-right={50}
+        shadow-camera-top={50}
+        shadow-camera-bottom={-50}/>
       {/* Soft fill light */}
-      <pointLight position={[-10, 20, -20]} intensity={0.3} />
+      <pointLight position={[-10, 20, -20]} intensity={0.4} />
       <LineChart data={data} />
       <OrbitControls enableZoom={true} />
     </Canvas>
