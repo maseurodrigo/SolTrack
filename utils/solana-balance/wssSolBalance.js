@@ -33,9 +33,11 @@ export default function getSolanaBalance(walletAddress) {
         setBalance(lamports / 1e9); // Convert lamports to SOL
       }
     };
-    
+
     wsConn.onerror = (error) => { console.error("Solana RPC WebSocket Error:", error); };
 
+    wsConn.onclose = (event) => { console.log("Solana RPC WebSocket Connection Closed:", event); };
+    
     return () => {
       // Cleanup the WebSocket connection on unmount or wallet change
       if (wsConn.readyState === WebSocket.OPEN) {

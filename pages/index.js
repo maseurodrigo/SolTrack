@@ -17,8 +17,10 @@ export default function Home() {
   return (
     <NextUIProvider>
       <Head>
+        <html lang="en"/>
         <title>SolTrack</title>
         <meta property="og:title" content="SolTrack" key="title"/>
+        <meta name="description" content="Web tool to track Solana wallet balances and PnL"/>
       </Head>
       <Toaster position="top-center"/>
       <motion.div className="box">
