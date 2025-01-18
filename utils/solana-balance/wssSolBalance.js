@@ -13,6 +13,8 @@ export default function getSolanaBalance(walletAddress) {
     
     const wsConn = new WebSocket(SOLANA_RPC_WS);
 
+    console.log("Solana RPC WebSocket New Connection:", wsConn);
+
     wsConn.onopen = () => {
       // Subscribe to account changes for the wallet address
       const subscriptionPayload = {
