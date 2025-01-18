@@ -22,6 +22,8 @@ export default function getSolanaBalance(walletAddress) {
         params: [walletAddress, { encoding: "jsonParsed", commitment: "finalized" }]
       };
       wsConn.send(JSON.stringify(subscriptionPayload));
+
+      console.log("Solana RPC WebSocket Connection Opened:", walletAddress);
     };
     
     wsConn.onmessage = (event) => {
@@ -32,6 +34,8 @@ export default function getSolanaBalance(walletAddress) {
         const lamports = data.params.result.value.lamports;
         setBalance(lamports / 1e9); // Convert lamports to SOL
       }
+
+      console.log("Solana RPC WebSocket Connection Message:", (amports / 1e9));
     };
 
     wsConn.onerror = (error) => { console.error("Solana RPC WebSocket Error:", error); };
