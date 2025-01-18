@@ -1,13 +1,14 @@
-import { isValidSolanaAddress } from "../../utils/validation";
-import { getSolBalance } from "../../utils/solana";
+import { isValidSolanaAddress } from "/utils/validation";
+import getSolanaBalance from "/utils/solana-balance/httpSolBalance";
 import checkDbAndGetWallet from './db/GetWallet';
 import updtWalletFuncs from './db/UpdateWallet';
 
 let userData = {};
 
 export default async function handler(req, res) {
-  const { wallet } = req.query;
-
+  const { wallet, currentBalance } = req.query;
+  let localBalance = currentBalance === 'null' ? undefined : parseFloat(currentBalance);
+  
   if (!wallet || !isValidSolanaAddress(wallet)) {
     return res.status(400).json({ error: "Valid wallet address is required" });
   }
@@ -63,14 +64,16 @@ export default async function handler(req, res) {
     }
   }
 
-  const currentBalance = await getSolBalance(wallet);
+  // Check if localBalance is not a valid number, then fetch balance from Solana mainnet
+  if (isNaN(localBalance)) { localBalance = await getSolanaBalance(wallet); }
+
   const data = userData[wallet];
   const now = new Date();
 
   // Update daily PnL
   if (data.startingDate !== now.toDateString()) {
     data.startingDate = now.toDateString();
-    data.startingBalance = currentBalance;
+    data.startingBalance = localBalance;
   }
   
   // Recalculate weekly and monthly PnL if the date changes
@@ -79,23 +82,23 @@ export default async function handler(req, res) {
 
   if (!data.weekStartDate || data.weekStartDate.toDateString() !== startOfWeek.toDateString()) {
     data.weekStartDate = startOfWeek;
-    data.weekStartBalance = currentBalance;
+    data.weekStartBalance = localBalance;
 
     // Update the week start date and balance in the database
-    await updtWalletFuncs.checkDbAndUpdateWeek(wallet, startOfWeek, currentBalance, startOfMonth, currentBalance);
+    await updtWalletFuncs.checkDbAndUpdateWeek(wallet, startOfWeek, localBalance, startOfMonth, localBalance);
   }
 
   if (!data.monthStartDate || data.monthStartDate.toDateString() !== startOfMonth.toDateString()) {
     data.monthStartDate = startOfMonth;
-    data.monthStartBalance = currentBalance;
+    data.monthStartBalance = localBalance;
 
     // Update the month start date and balance in the database
-    await updtWalletFuncs.checkDbAndUpdateMonth(wallet, startOfWeek, currentBalance, startOfMonth, currentBalance);
+    await updtWalletFuncs.checkDbAndUpdateMonth(wallet, startOfWeek, localBalance, startOfMonth, localBalance);
   }
 
-  const pnl = +(currentBalance - data.startingBalance).toFixed(2);
-  const weekPnl = +(currentBalance - data.weekStartBalance).toFixed(2);
-  const monthPnl = +(currentBalance - data.monthStartBalance).toFixed(2);
+  const pnl = +(localBalance - data.startingBalance).toFixed(2);
+  const weekPnl = +(localBalance - data.weekStartBalance).toFixed(2);
+  const monthPnl = +(localBalance - data.monthStartBalance).toFixed(2);
 
   const updatedData = {
     startingDate: data.startingDate,
@@ -104,7 +107,7 @@ export default async function handler(req, res) {
     weekStartBalance: data.weekStartBalance,
     monthStartDate: data.monthStartDate,
     monthStartBalance: data.monthStartBalance,
-    currentBalance,
+    currentBalance: localBalance,
     pnl,
     weekPnl,
     monthPnl

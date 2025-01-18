@@ -7,6 +7,7 @@ import Image from 'next/image';
 import RemoveBackCSS from './RemoveBackCSS';
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
 import { calcPnLPerc } from "/utils/calcPnLPercentage";
+import getSolanaBalance from "/utils/solana-balance/wssSolBalance";
 
 export const PlatformRadio = (props) => {
   const {children, ...otherProps} = props;
@@ -19,7 +20,7 @@ export const PlatformRadio = (props) => {
           "rounded-lg bg-[#1F2029] border border-[#343641]",
           "px-4 py-2 max-w-[300px] transition-all duration-200 cursor-pointer",
           "data-[selected=true]:outline-none data-[selected=true]:ring-1 data-[selected=true]:ring-opacity-50 data-[selected=true]:ring-green-800 data-[selected=true]:shadow-lg"
-        ),
+        )
       }}
     >
       {children}
@@ -36,54 +37,20 @@ const WalletTracker = () => {
   const [widgetFontSize, setWidgetFontSize] = useState("text-sm"); // State to set widget font sizes
   const [showWeekPnl, setShowWeekPnl] = useState(false); // State to toggle weekly PnL
   const [showMonthPnl, setShowMonthPnl] = useState(false); // State to toggle monthly PnL
-  const [chartEnabled, setChartEnabled] = useState(false); // State to toggle PnL chart
+  const [backChartEnabled, setBackChartEnabled] = useState(true); // State to toggle PnL 2D PnL chart
+  const [pnlChartEnabled, setPnLChartEnabled] = useState(false); // State to toggle PnL 3D PnL chart
   const [showRemoveBackCSS, setRemoveBackCSS] = useState(false); // State to toggle background CSS code
   const [platSelected, setPlatSelected] = useState(""); // State to toggle selected platform
   const [currentPath, setCurrentPath] = useState(""); // Get the current URL as a string
-
+  
   const shownErrors = new Set(); // Function to track shown error messages
   const backCSSRef = useRef(null); // Reference to access DOM element rendered by RemoveBackCSS
 
   const setHasShownError = (errorMessage) => { shownErrors.add(errorMessage); };
   const hasShownError = (errorMessage) => { return shownErrors.has(errorMessage); };
 
-  const fetchData = async () => {
-    try {
-      // If theres no wallet address, don't proceed
-      if (!walletAddress)
-      {
-        // Check if error message has already been shown using the Set
-        if (!hasShownError("Wallet address required")) {
-          toast.error("Wallet address required");
-          setHasShownError("Wallet address required");
-        }
-        return;
-      }
-      
-      const response = await fetch(`/api/wallet_data?wallet=${walletAddress}`);
-
-      // If response is not okay, parse the error response
-      if (!response.ok) {
-        const errorData = await response.json();  // Parse JSON to get error details
-
-        // Check if error message has already been shown using the Set
-        if (!hasShownError(errorData.error)) {
-          toast.error(errorData.error);
-          setHasShownError(errorData.error);
-        }
-        return;
-      }
-      
-      const data = await response.json();
-      setWalletData(data);
-    } catch (err) {
-      // Check if error message has already been shown using the Set
-      if (!hasShownError(err.message)) {
-        toast.error(err.message);
-        setHasShownError(err.message);
-      }
-    }
-  };
+  // Fetch balance using Solana RPC via WebSocket for real-time updates
+  const currentBalance = getSolanaBalance(walletAddress);
 
   useEffect(() => {
     // Access window object
@@ -91,33 +58,97 @@ const WalletTracker = () => {
   }, []);
 
   useEffect(() => {
-    shownErrors.clear();  // Clear errors when walletAddress changes
+    // If theres no wallet address, don't proceed
+    if (walletAddress != null && (typeof walletAddress !== 'string' || walletAddress.trim() !== '')) { 
+      const fetchData = async () => {
+        try {
+          // Send a request with wallet address and current balance as query parameters
+          const response = await fetch(`/api/wallet_data?wallet=${walletAddress}&currentBalance=${null}`);
 
-    // Fetch data when walletAddress changes
-    if (walletAddress) { fetchData(); }
+          // If response is not okay, parse the error response
+          if (!response.ok) {
+            const errorData = await response.json();  // Parse JSON to get error details
     
-    // Set up the interval
-    const interval = setInterval(() => { fetchData(); }, 5000);
+            // Check if error message has already been shown using the Set
+            if (!hasShownError(errorData.error)) {
+              toast.error(errorData.error);
+              setHasShownError(errorData.error);
+            }
+            return;
+          }
+          
+          const data = await response.json();
+          setWalletData(data);
+        } catch (err) {
+          // Check if error message has already been shown using the Set
+          if (!hasShownError(err.message)) {
+            toast.error(err.message);
+            setHasShownError(err.message);
+          }
+        }
+      };
+      fetchData();
+    }
+  }, [walletAddress]); // Re-fetch when walletAddress change
 
-    return () => clearInterval(interval);
-  }, [walletAddress]); // Re-fetch when walletAddress or options change
-
+  useEffect(() => {
+    // If theres no wallet address, don't proceed
+    if (walletAddress != null && (typeof walletAddress !== 'string' || walletAddress.trim() !== '')) { 
+      const fetchData = async () => {
+        try {
+          // Send a request with wallet address and current balance as query parameters
+          const response = await fetch(`/api/wallet_data?wallet=${walletAddress}&currentBalance=${currentBalance}`);
+          
+          // If response is not okay, parse the error response
+          if (!response.ok) {
+            const errorData = await response.json();  // Parse JSON to get error details
+    
+            // Check if error message has already been shown using the Set
+            if (!hasShownError(errorData.error)) {
+              toast.error(errorData.error);
+              setHasShownError(errorData.error);
+            }
+            return;
+          }
+          
+          const data = await response.json();
+          setWalletData(data);
+        } catch (err) {
+          // Check if error message has already been shown using the Set
+          if (!hasShownError(err.message)) {
+            toast.error("Overload with txns from the previous wallet");
+            setHasShownError(err.message);
+          }
+        }
+      };
+      fetchData();
+    }
+  }, [currentBalance]); // Re-fetch when currentBalance change
+  
   // Update input value
   const handleWalletAddressChange = (event) => { setInputAddress(event.target.value); };
 
   useEffect(() => {
-    const walletData = { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, chartEnabled, platSelected };
+    const walletData = { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, pnlChartEnabled, platSelected };
 
     // Convert data to query parameters for new tab navigation
     const queryParams = new URLSearchParams(walletData).toString();
 
     // Store URL with the data passed as query params
     setWalletDetails(`${currentPath}components/WalletDetails?${queryParams}`);
-  }, [walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, chartEnabled, platSelected]); // Re-fetch when walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, chartEnabled or platSelected change
+
+    // Re-fetch when walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, pnlChartEnabled or platSelected change
+  }, [walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, pnlChartEnabled, platSelected]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    setWalletAddress(inputAddress); // Set the wallet address from the form input
+
+    // Checks if not null or undefined and not an empty string
+    if (inputAddress != null && (typeof inputAddress !== 'string' || inputAddress.trim() !== '')) {
+      setWalletAddress(inputAddress); // Set the wallet address from the form input
+    } else {
+      toast.error("Valid wallet address is required");
+    }
   };
 
   // Toggle weekly PnL
@@ -126,8 +157,11 @@ const WalletTracker = () => {
   // Toggle monthly PnL
   const handleMonthPnlToggle = () => { setShowMonthPnl((prev) => !prev); };
 
-  // Toggle PnL chart visibility
-  const handleChartVisibility = () => { setChartEnabled((prev) => !prev); };
+  // Toggle 2D PnL chart visibility
+  const handleBackChartVisibility = () => { setBackChartEnabled((prev) => !prev); };
+
+  // Toggle 3D PnL chart visibility
+  const handlePnLChartVisibility = () => { setPnLChartEnabled((prev) => !prev); };
 
   // Toggle background CSS code
   const handleRemoveBackCSS = () => { setRemoveBackCSS((prev) => !prev); };
@@ -154,10 +188,11 @@ const WalletTracker = () => {
               value={inputAddress}
               onChange={handleWalletAddressChange}
               className="bg-[#1F2029] text-gray-300 border border-[#343641] rounded-lg w-4/5 px-4 py-3 transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-opacity-50 focus:ring-green-800 focus:shadow-xl" />
-            <button 
-              type="submit" 
-              className="bg-green-600 hover:bg-green-500 ml-2 py-3 px-3 rounded-md cursor-pointer shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <button type="submit" className="bg-green-600 hover:bg-green-500 ml-2 py-3 px-3 rounded-md cursor-pointer shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
             </button>
           </form>
           <div className="flex justify-center items-center mt-12">
@@ -215,10 +250,18 @@ const WalletTracker = () => {
                 </div>
               </div>
               <div className="flex justify-start items-center">
-                {/* Checkbox to toggle PnL chart visibility */}
+                {/* Checkbox to toggle 2D PnL chart visibility */}
                 <div className="mb-4">
-                  <Switch size="sm" color="success" isSelected={chartEnabled} onChange={handleChartVisibility}>
-                    <label className="text-gray-300 font-medium">BETA: Show PnL Chart (Every 10 Trades)</label>
+                  <Switch size="sm" color="success" isSelected={backChartEnabled} onChange={handleBackChartVisibility}>
+                    <label className="text-gray-300 font-medium">Show 2D Background Chart</label>
+                  </Switch>
+                </div>
+              </div>
+              <div className="flex justify-start items-center">
+                {/* Checkbox to toggle 3D PnL chart visibility */}
+                <div className="mb-4">
+                  <Switch size="sm" color="success" isSelected={pnlChartEnabled} onChange={handlePnLChartVisibility}>
+                    <label className="text-gray-300 font-medium">Show 3D PnL Chart (Every 10 Trades)</label>
                   </Switch>
                 </div>
               </div>
@@ -254,7 +297,7 @@ const WalletTracker = () => {
       </div>
       {showRemoveBackCSS && (
         <div className="flex justify-center items-center w-full">
-          <div className="flex justify-center items-center bg-[rgba(31,32,41,0.2)] text-white pl-8 pr-4 py-2 mt-8 rounded-lg shadow-lg">
+          <div className="flex justify-center items-center max-w-screen-2xl bg-[rgba(31,32,41,0.2)] text-white pl-8 pr-4 py-2 mt-8 rounded-lg shadow-lg">
             <div ref={backCSSRef}>
               <RemoveBackCSS/>
             </div>
@@ -269,7 +312,7 @@ const WalletTracker = () => {
       )}
       {walletData && currentPath && walletDetails && (
         <div className="flex justify-center items-center w-full">
-          <div className="flex justify-center items-center bg-[rgba(31,32,41,0.2)] text-white pl-8 pr-4 py-2 mt-8 rounded-lg shadow-lg">
+          <div className="flex justify-center items-center max-w-screen-2xl bg-[rgba(31,32,41,0.2)] text-white pl-8 pr-4 py-2 mt-8 rounded-lg shadow-lg">
             {walletDetails}
             <button onClick={copyURLToClipboard}
               className="bg-[#1F2029] text-white hover:bg-[rgba(31,32,41,0.2)] ml-4 py-3 px-3 rounded-md cursor-pointer shadow-md">
@@ -283,7 +326,7 @@ const WalletTracker = () => {
       {walletData ? (
         <NumberFlowGroup>
           <div className="flex justify-center items-center mt-8">
-            <AnimatedBorderTrail trailSize="lg" trailColor={walletData?.pnl < 0 ? "red" : walletData?.pnl > 0 ? "green" : "grey"}>
+            <AnimatedBorderTrail trailSize="lg" trailColor={parseFloat(walletData?.pnl).toFixed(2) < 0 ? "red" : parseFloat(walletData?.pnl).toFixed(2) > 0 ? "green" : "grey"}>
               <div className="flex justify-center items-center bg-[#1F2029] text-white max-w-fit px-4 rounded-lg shadow-2xl">
                 {platSelected && platSelected !== "noplat" && (
                   <div className="flex justify-center items-center text-shadow">
@@ -297,40 +340,40 @@ const WalletTracker = () => {
                     <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter ml-4 drop-shadow"/>
                   </div>
                 </div>
-                <div className={`flex flex-col justify-center items-center text-9xl ${widgetPaddingSize} ${walletData?.pnl > 0 ? 'text-emerald-500' : walletData?.pnl < 0 ? 'text-red-500' : 'text-white'}`}>
+                <div className={`flex flex-col justify-center items-center text-9xl ${widgetPaddingSize} ${parseFloat(walletData?.pnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.pnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'}`}>
                   <div className={`${widgetFontSize} uppercase text-gray-500 tracking-wider text-shadow-sm mb-2`}>TODAY PNL</div>
                   <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                     <div style={{ '--number-flow-char-height': '0.85em' }} className="flex items-center gap-4 font-semibold">
-                      {walletData?.pnl > 0 ? "+" : ""}<NumberFlow value={walletData?.pnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }}/>
+                      {parseFloat(walletData?.pnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.pnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }}/>
                       <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow"/>
                     </div>
                   </div>
-                  {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.pnl).toFixed(2) && walletData?.pnl < 0 && (
+                  {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.pnl).toFixed(2) && parseFloat(walletData?.pnl).toFixed(2) < 0 && (
                     <div className="flex justify-center items-center text-xs font-medium text-shadow bg-red-100 text-red-800 mt-2 px-4 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
                       <NumberFlow className={`${widgetFontSize}`} value={calcPnLPerc(walletData?.startingBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                     </div>
                   )}
-                  {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.pnl).toFixed(2) && walletData?.pnl > 0 && (
+                  {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.pnl).toFixed(2) && parseFloat(walletData?.pnl).toFixed(2) > 0 && (
                     <div className="flex justify-center items-center text-xs font-medium text-shadow bg-green-100 text-green-800 mt-2 px-4 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
                       <NumberFlow className={`${widgetFontSize}`} value={calcPnLPerc(walletData?.startingBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                     </div>
                   )}
                 </div>
                 {showWeekPnl && (
-                  <div className={`flex flex-col justify-center items-center text-9xl ${widgetPaddingSize} ${walletData?.weekPnl > 0 ? 'text-emerald-500' : walletData?.weekPnl < 0 ? 'text-red-500' : 'text-white'}`}>
+                  <div className={`flex flex-col justify-center items-center text-9xl ${widgetPaddingSize} ${parseFloat(walletData?.weekPnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.weekPnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'}`}>
                     <div className={`${widgetFontSize} uppercase text-gray-500 tracking-wider text-shadow-sm mb-2`}>WEEKLY PNL</div>
                     <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                       <div style={{ '--number-flow-char-height': '0.85em' }} className="flex items-center gap-4 font-semibold">
-                        {walletData?.weekPnl > 0 ? "+" : ""}<NumberFlow value={walletData?.weekPnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }}/>
+                        {parseFloat(walletData?.weekPnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.weekPnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }}/>
                         <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow"/>
                       </div>
                     </div>
-                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.weekPnl).toFixed(2) && walletData?.weekPnl < 0 && (
+                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.weekPnl).toFixed(2) && parseFloat(walletData?.weekPnl).toFixed(2) < 0 && (
                       <div className="flex justify-center items-center text-xs font-medium text-shadow bg-red-100 text-red-800 mt-2 px-4 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
                         <NumberFlow className={`${widgetFontSize}`} value={calcPnLPerc(walletData?.weekStartBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                       </div>
                     )}
-                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.weekPnl).toFixed(2) && walletData?.weekPnl > 0 && (
+                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.weekPnl).toFixed(2) && parseFloat(walletData?.weekPnl).toFixed(2) > 0 && (
                       <div className="flex justify-center items-center text-xs font-medium text-shadow bg-green-100 text-green-800 mt-2 px-4 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
                         <NumberFlow className={`${widgetFontSize}`} value={calcPnLPerc(walletData?.weekStartBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                       </div>
@@ -338,20 +381,20 @@ const WalletTracker = () => {
                   </div>
                 )}
                 {showMonthPnl && (
-                  <div className={`flex flex-col justify-center items-center text-9xl ${widgetPaddingSize} ${walletData?.monthPnl > 0 ? 'text-emerald-500' : walletData?.monthPnl < 0 ? 'text-red-500' : 'text-white'}`}>
+                  <div className={`flex flex-col justify-center items-center text-9xl ${widgetPaddingSize} ${parseFloat(walletData?.monthPnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.monthPnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'}`}>
                     <div className={`${widgetFontSize} uppercase text-gray-500 tracking-wider text-shadow-sm mb-2`}>MONTHLY PNL</div>
                     <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                       <div style={{ '--number-flow-char-height': '0.85em' }} className="flex items-center gap-4 font-semibold">
-                        {walletData?.monthPnl > 0 ? "+" : ""}<NumberFlow value={walletData?.monthPnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }}/>
+                        {parseFloat(walletData?.monthPnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.monthPnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }}/>
                         <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow"/>
                       </div>
                     </div>
-                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.monthPnl).toFixed(2) && walletData?.monthPnl < 0 && (
+                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.monthPnl).toFixed(2) && parseFloat(walletData?.monthPnl).toFixed(2) < 0 && (
                       <div className="flex justify-center items-center text-xs font-medium text-shadow bg-red-100 text-red-800 mt-2 px-4 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
                         <NumberFlow className={`${widgetFontSize}`} value={calcPnLPerc(walletData?.monthStartBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                       </div>
                     )}
-                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.monthPnl).toFixed(2) && walletData?.monthPnl > 0 && (
+                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.monthPnl).toFixed(2) && parseFloat(walletData?.monthPnl).toFixed(2) > 0 && (
                       <div className="flex justify-center items-center text-xs font-medium text-shadow bg-green-100 text-green-800 mt-2 px-4 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
                         <NumberFlow className={`${widgetFontSize}`} value={calcPnLPerc(walletData?.monthStartBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                       </div>

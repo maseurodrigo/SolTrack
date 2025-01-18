@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "../../../../lib/utils";
 
 interface IconRippleProps extends React.HTMLAttributes<HTMLDivElement> {
