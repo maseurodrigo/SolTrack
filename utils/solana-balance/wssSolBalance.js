@@ -9,7 +9,12 @@ export default function getSolanaBalance(walletAddress) {
   const [balance, setBalance] = useState(null);
 
   useEffect(() => {
-    if (!walletAddress || !SOLANA_RPC_WS) return;
+    if (!walletAddress || !SOLANA_RPC_WS) {
+
+      console.log("!walletAddress || !SOLANA_RPC_WS");
+      
+      return;
+    }
 
     try {
       const wsConn = new WebSocket(SOLANA_RPC_WS);
