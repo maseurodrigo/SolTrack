@@ -5,10 +5,15 @@ const SOLANA_RPC_WS = process.env.NEXT_PUBLIC_SOLANA_RPC_WS_URL;
 
 export default function getSolanaBalance(walletAddress) {
 
+  console.log("getSolanaBalance()");
+
   // Default value is null until walletAddress is set
   const [balance, setBalance] = useState(null);
 
   useEffect(() => {
+
+    console.log("getSolanaBalance() -> useEffect()");
+
     if (!walletAddress || !SOLANA_RPC_WS) return;
     
     const wsConn = new WebSocket(SOLANA_RPC_WS);
