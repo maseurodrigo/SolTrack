@@ -41,24 +41,26 @@ export default function getSolanaBalance(walletAddress) {
       // Handle WebSocket connection closure
       wsConn.onclose = (event) => { console.log("Solana RPC WebSocket Connection Closed:", event); };
 
+      return () => {
+        // Cleanup the WebSocket connection on unmount or wallet change
+        if (wsConn.readyState === WebSocket.OPEN) {
+          const unsubscribePayload = {
+            jsonrpc: "2.0",
+            id: 1,
+            method: "accountUnsubscribe",
+            params: [1] // Use the same subscription ID as in `id`
+          };
+          wsConn.send(JSON.stringify(unsubscribePayload));
+          wsConn.close();
+        }
+      };
     } catch (connectionError) {
       // Catch any errors that occur while establishing the WebSocket connection
       console.error("Failed to establish Solana RPC WebSocket connection: ", connectionError);
-    }
 
-    return () => {
-      // Cleanup the WebSocket connection on unmount or wallet change
-      if (wsConn.readyState === WebSocket.OPEN) {
-        const unsubscribePayload = {
-          jsonrpc: "2.0",
-          id: 1,
-          method: "accountUnsubscribe",
-          params: [1] // Use the same subscription ID as in `id`
-        };
-        wsConn.send(JSON.stringify(unsubscribePayload));
-        wsConn.close();
-      }
-    };
+      // Return a no-op cleanup function in case of failure
+      return () => {};
+    }
   }, [walletAddress]); // Re-run the effect when walletAddress changes
   
   return balance;
