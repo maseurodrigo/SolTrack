@@ -37,10 +37,7 @@ export default function getSolanaBalance(walletAddress) {
 
       // Handle WebSocket connection errors
       wsConn.onerror = (error) => { console.error("Solana RPC WebSocket Error:", error); };
-
-      // Handle WebSocket connection closure
-      wsConn.onclose = (event) => { console.log("Solana RPC WebSocket Connection Closed:", event); };
-
+      
       return () => {
         // Cleanup the WebSocket connection on unmount or wallet change
         if (wsConn.readyState === WebSocket.OPEN) {

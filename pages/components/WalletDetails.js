@@ -74,6 +74,7 @@ export default function WalletDetails() {
     
     useEffect(() => {
         if (walletData?.pnl !== undefined) {
+            
             // Single trade data
             const newTradeData = { timestamp: Date.now(), value: walletData?.pnl };
 

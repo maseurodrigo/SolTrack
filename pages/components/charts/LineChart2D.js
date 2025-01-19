@@ -60,7 +60,24 @@ const LineChart2D = ({ data = [], width = 1600, height = 200 }) => {
       const start = getPointCoords(i);
       const end = getPointCoords(i + 1);
       
-      if (data[i].value >= 0 && data[i + 1].value >= 0) {
+      // Handling for the first point to second point when positive
+      if (i === 0 && data[i + 1].value >= 0) {
+        const fillGradient = ctx.createLinearGradient(end.x, end.y, end.x, zeroY);
+        fillGradient.addColorStop(0, `rgba(0, 255, 136, ${getIntensity(data[i + 1].value) * 0.3})`);
+        fillGradient.addColorStop(0.5, `rgba(0, 255, 136, ${getIntensity(data[i + 1].value) * 0.1})`);
+        fillGradient.addColorStop(1, 'rgba(0, 255, 136, 0)');
+        
+        ctx.beginPath();
+        ctx.fillStyle = fillGradient;
+        ctx.moveTo(start.x, zeroY);
+        ctx.lineTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+        ctx.lineTo(end.x, zeroY);
+        ctx.closePath();
+        ctx.fill();
+      }
+      // Regular handling for other points
+      else if (data[i].value >= 0 && data[i + 1].value >= 0) {
         const fillGradient = ctx.createLinearGradient(start.x, start.y, start.x, zeroY);
         fillGradient.addColorStop(0, `rgba(0, 255, 136, ${getIntensity(data[i].value) * 0.15})`);
         fillGradient.addColorStop(0.7, `rgba(0, 255, 136, ${getIntensity(data[i].value) * 0.05})`);

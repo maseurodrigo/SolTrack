@@ -260,7 +260,7 @@ const WalletTracker = () => {
               <div className="flex justify-start items-center">
                 {/* Checkbox to toggle 3D PnL chart visibility */}
                 <div className="mb-4">
-                  <Switch size="sm" color="success" isSelected={pnlChartEnabled} onChange={handlePnLChartVisibility} disabled>
+                  <Switch size="sm" color="success" isSelected={pnlChartEnabled} onChange={handlePnLChartVisibility} isDisabled>
                     <label className="text-gray-300 font-medium">Show 3D PnL Chart (Every 10 Trades)</label>
                   </Switch>
                 </div>
