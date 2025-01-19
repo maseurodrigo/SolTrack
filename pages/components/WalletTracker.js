@@ -1,8 +1,9 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { toast } from 'react-hot-toast';
 import { Switch, RadioGroup, Radio, cn } from "@nextui-org/react";
 import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 import Image from 'next/image';
+import ColorPicker from 'react-best-gradient-color-picker';
 
 import RemoveBackCSS from './RemoveBackCSS';
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
@@ -40,9 +41,10 @@ const WalletTracker = () => {
   const [backChartEnabled, setBackChartEnabled] = useState(true); // State to toggle PnL 2D PnL chart
   const [pnlChartEnabled, setPnLChartEnabled] = useState(false); // State to toggle PnL 3D PnL chart
   const [showRemoveBackCSS, setRemoveBackCSS] = useState(false); // State to toggle background CSS code
+  const [backgroundColor, setBackgroundColor] = useState('rgba(31, 32, 41, 1)'); // State to change background widget color
   const [platSelected, setPlatSelected] = useState(""); // State to toggle selected platform
   const [currentPath, setCurrentPath] = useState(""); // Get the current URL as a string
-  
+
   const shownErrors = new Set(); // Function to track shown error messages
   const backCSSRef = useRef(null); // Reference to access DOM element rendered by RemoveBackCSS
 
@@ -124,12 +126,12 @@ const WalletTracker = () => {
       fetchData();
     }
   }, [currentBalance]); // Re-fetch when currentBalance change
-  
+
   // Update input value
   const handleWalletAddressChange = (event) => { setInputAddress(event.target.value); };
 
   useEffect(() => {
-    const walletData = { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, pnlChartEnabled, platSelected };
+    const walletData = { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor, platSelected };
 
     // Convert data to query parameters for new tab navigation
     const queryParams = new URLSearchParams(walletData).toString();
@@ -137,8 +139,8 @@ const WalletTracker = () => {
     // Store URL with the data passed as query params
     setWalletDetails(`${currentPath}components/WalletDetails?${queryParams}`);
 
-    // Re-fetch when walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, pnlChartEnabled or platSelected change
-  }, [walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, pnlChartEnabled, platSelected]);
+    // Re-fetch when walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor or platSelected change
+  }, [walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor, platSelected]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -274,16 +276,19 @@ const WalletTracker = () => {
                 </div>
               </div>
             </div>
+            <div className="w-auto border-r-2 border-[#343641] mr-12 pr-12">
+              <ColorPicker className="rounded-lg shadow-md" value={backgroundColor} onChange={setBackgroundColor} hidePresets={true} hideInputs={true} hideEyeDrop={true} hideColorGuide={true} hideInputType={true}/>
+            </div>
             <div className="w-auto">
               <div className="flex justify-left items-center">
-                <RadioGroup orientation="horizontal" defaultValue="noplat" onValueChange={setPlatSelected}>
-                  <PlatformRadio className="mr-4" color="success" value="noplat">
+                <RadioGroup orientation="vertical" defaultValue="noplat" onValueChange={setPlatSelected}>
+                  <PlatformRadio className="mb-4" color="success" value="noplat">
                     <Image alt="noplat" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/noplat.png"} priority={false}/>
                   </PlatformRadio>
-                  <PlatformRadio className="mr-4" color="success" value="photon">
+                  <PlatformRadio className="mb-4" color="success" value="photon">
                     <Image alt="photon" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/photon.png"} priority={false}/>
                   </PlatformRadio>
-                  <PlatformRadio className="mr-4" color="success" value="bullx">
+                  <PlatformRadio className="mb-4" color="success" value="bullx">
                     <Image alt="bullx" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/bullx.png"} priority={false}/>
                   </PlatformRadio>
                   <PlatformRadio color="success" value="nova">
@@ -325,9 +330,9 @@ const WalletTracker = () => {
       )}
       {walletData ? (
         <NumberFlowGroup>
-          <div className="flex justify-center items-center mt-8">
+          <div className="flex justify-center items-center my-8">
             <AnimatedBorderTrail trailSize="lg" trailColor={parseFloat(walletData?.pnl).toFixed(2) < 0 ? "red" : parseFloat(walletData?.pnl).toFixed(2) > 0 ? "green" : "grey"}>
-              <div className="flex justify-center items-center bg-[#1F2029] text-white max-w-fit px-4 rounded-lg shadow-2xl">
+              <div className="flex justify-center items-center text-white max-w-fit px-4 rounded-lg shadow-2xl" style={{ background: `${backgroundColor}` }}>
                 {platSelected && platSelected !== "noplat" && (
                   <div className="flex justify-center items-center text-shadow">
                     <img src={`/${platSelected}.png`} alt={platSelected} className="w-auto h-auto max-w-32 max-h-32 filter drop-shadow-xl"/>

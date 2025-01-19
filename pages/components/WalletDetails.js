@@ -6,7 +6,6 @@ import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
 import { calcPnLPerc } from "/utils/calcPnLPercentage";
 import getSolanaBalance from "/utils/solana-balance/wssSolBalance";
-import Chart3D from './charts/Chart3D.js';
 import LineChart2D from './charts/LineChart2D.js';
 
 export default function WalletDetails() {
@@ -15,18 +14,13 @@ export default function WalletDetails() {
     const [walletData, setWalletData] = useState(null);
     const [walletConfig, setWalletConfig] = useState(null);
     const [tradeData, setTradeData] = useState([]);
-    const [renderChartData, setRenderChartData] = useState(false); // State for PnL chart rendering
-    const [isChartVisible, setIsChartVisible] = useState(false); // State for PnL chart visibility
 
     // Fetch balance using Solana RPC via WebSocket for real-time updates
     const currentBalance = getSolanaBalance(locWalletAddress);
 
-    const isProcessingChartRef = useRef(false); // To track if the PnL chart function is already running
-    const timerChartRef = useRef(null); // To track the PnL chart timer
-    
     useEffect(() => {
         if (router.isReady) {
-            const { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, pnlChartEnabled, platSelected } = router.query;
+            const { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor, platSelected } = router.query;
             setLocWalletAddress(walletAddress); // Set the wallet address from URL
 
             if (walletAddress) {
@@ -37,7 +31,7 @@ export default function WalletDetails() {
                     showWeekPnl: showWeekPnl?.toLowerCase() === 'true', // Convert to boolean
                     showMonthPnl: showMonthPnl?.toLowerCase() === 'true', // Convert to boolean
                     backChartEnabled: backChartEnabled?.toLowerCase() === 'true', // Convert to boolean
-                    pnlChartEnabled: pnlChartEnabled?.toLowerCase() === 'true', // Convert to boolean
+                    backgroundColor: backgroundColor?.toLowerCase(),
                     platSelected: platSelected?.toLowerCase()
                 });
             } else {
@@ -95,42 +89,13 @@ export default function WalletDetails() {
         }
     }, [walletData]);
 
-    useEffect(() => {
-        // Check if tradeData.length is a positive multiple of 10
-        if (tradeData.length > 1 && tradeData.length % 10 === 0) {
-            // If already processing, do nothing
-            if (isProcessingChartRef.current) return;
-
-            isProcessingChartRef.current = true; // Mark as processing
-            setRenderChartData(true); // Start rendering the chart
-            setTimeout(() => setIsChartVisible(true), 0); // Trigger fade-in effect
-
-            // Start the timer
-            timerChartRef.current = setTimeout(() => {
-                setIsChartVisible(false); // Start fade-out effect
-                setTimeout(() => {
-                    setRenderChartData(false); // Remove from DOM after fade-out
-                    isProcessingChartRef.current = false; // Mark as done
-                }, 1000);
-            }, 6000);
-
-            // Clean up the timer when tradeData changes or component unmounts
-            return () => {
-                if (timerChartRef.current) {
-                    clearTimeout(timerChartRef.current);
-                    isProcessingChartRef.current = false; // Reset processing state on cleanup
-                }
-            };
-        }
-    }, [tradeData]);
-    
     return (
         <>
             {walletConfig && walletData ? (
                 <NumberFlowGroup>
                     <div className="fixed bottom-0 left-0 w-full flex justify-center items-center mb-12">
                         <AnimatedBorderTrail trailSize="lg" trailColor={parseFloat(walletData?.pnl).toFixed(2) < 0 ? "red" : parseFloat(walletData?.pnl).toFixed(2) > 0 ? "green" : "white"}>
-                            <div className="flex justify-center items-center bg-[#1F2029] text-white max-w-fit px-4 rounded-lg shadow-2xl">
+                            <div className="flex justify-center items-center text-white max-w-fit px-4 rounded-lg shadow-2xl" style={{ background: `${walletConfig.backgroundColor}` }}>
                                 {walletConfig.backChartEnabled && (
                                     <LineChart2D data={tradeData} />
                                 )}
@@ -210,12 +175,6 @@ export default function WalletDetails() {
                             </div>
                         </AnimatedBorderTrail>
                     </div>
-                    {/* Conditionally render Chart3D with fade effects */}
-                    {walletConfig.pnlChartEnabled && renderChartData && (
-                        <div className={`fixed top-0 left-0 w-screen h-screen bg-[#0a0a0a] bg-opacity-90 transition-opacity duration-1000 ${ isChartVisible ? "opacity-100" : "opacity-0"}`}>
-                            <Chart3D data={tradeData} />
-                        </div>
-                    )}
                 </NumberFlowGroup>
             ) : (
                 <></>

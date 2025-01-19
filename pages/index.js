@@ -8,9 +8,8 @@ import WalletTracker from "./components/WalletTracker";
 
 export default function Home() {
   useEffect(() => {
-    document.body.style.backgroundColor = "#282c34";
+    document.documentElement.style.backgroundColor = "#282c34";
     document.body.style.color = "#ffffff";
-    document.body.style.height = "100vh";
     document.body.style.textAlign = "center";
   }, []); // Empty dependency array ensures this runs once when the component mounts
   
