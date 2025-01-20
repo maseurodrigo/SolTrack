@@ -40,6 +40,7 @@ const WalletTracker = () => {
   const [widgetFontSize, setWidgetFontSize] = useState("text-sm"); // State to set widget font sizes
   const [showWeekPnl, setShowWeekPnl] = useState(false); // State to toggle weekly PnL
   const [showMonthPnl, setShowMonthPnl] = useState(false); // State to toggle monthly PnL
+  const [showPercentages, setShowPercentages] = useState(true); // State to toggle PnL percentages
   const [backChartEnabled, setBackChartEnabled] = useState(true); // State to toggle PnL 2D PnL chart
   const [showRemoveBackCSS, setRemoveBackCSS] = useState(false); // State to toggle background CSS code
   const [backgroundColor, setBackgroundColor] = useState('rgba(31, 32, 41, 1)'); // State to change background widget color
@@ -132,7 +133,7 @@ const WalletTracker = () => {
   const handleWalletAddressChange = (event) => { setInputAddress(event.target.value); };
 
   useEffect(() => {
-    const walletData = { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor, platSelected };
+    const walletData = { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, platSelected };
 
     // Encrypt the string
     const encryptedURLData = encrypt(process.env.NEXT_PUBLIC_PASSPHRASE, JSON.stringify(walletData, null, 2));
@@ -140,8 +141,8 @@ const WalletTracker = () => {
     // Store URL with the data passed as query params
     setWalletDetails(`${currentPath}components/WalletDetails?encryptedData=${encryptedURLData}`);
 
-    // Re-fetch when walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor or platSelected change
-  }, [walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor, platSelected]);
+    // Re-fetch when walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor or platSelected change
+  }, [walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, platSelected]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -160,6 +161,9 @@ const WalletTracker = () => {
   // Toggle monthly PnL
   const handleMonthPnlToggle = () => { setShowMonthPnl((prev) => !prev); };
 
+  // Toggle PnL percentages
+  const handlePnlPercentsToggle = () => { setShowPercentages((prev) => !prev); };
+
   // Toggle 2D PnL chart visibility
   const handleBackChartVisibility = () => { setBackChartEnabled((prev) => !prev); };
 
@@ -177,7 +181,7 @@ const WalletTracker = () => {
   }
 
   return (
-    <div className="pt-24">
+    <div className="pt-12">
       <div className="flex justify-center items-center">
         <div className="bg-[rgba(31,32,41,0.2)] px-24 py-12 rounded-lg max-w-fit shadow-md">
           {/* Wallet Address Input Form */}
@@ -234,7 +238,7 @@ const WalletTracker = () => {
             </div>
             <div className="w-auto border-r-2 border-[#343641] mr-12 pr-12">
               <div className="flex justify-start items-center">
-                {/* Checkbox to toggle weekly PnL */}
+                {/* Switch to toggle weekly PnL */}
                 <div className="mb-4">
                   <Switch size="sm" color="success" isSelected={showWeekPnl} onChange={handleWeekPnlToggle}>
                     <label className="text-gray-300 font-medium">Show Weekly PnL</label>
@@ -242,7 +246,7 @@ const WalletTracker = () => {
                 </div>
               </div>
               <div className="flex justify-start items-center">
-                {/* Checkbox to toggle monthly PnL */}
+                {/* Switch to toggle monthly PnL */}
                 <div className="mb-4">
                   <Switch size="sm" color="success" isSelected={showMonthPnl} onChange={handleMonthPnlToggle}>
                     <label className="text-gray-300 font-medium">Show Monthly PnL</label>
@@ -250,7 +254,15 @@ const WalletTracker = () => {
                 </div>
               </div>
               <div className="flex justify-start items-center">
-                {/* Checkbox to toggle 2D PnL chart visibility */}
+                {/* Switch to toggle PnL percentages */}
+                <div className="mb-4">
+                  <Switch size="sm" color="success" isSelected={showPercentages} onChange={handlePnlPercentsToggle}>
+                    <label className="text-gray-300 font-medium">Show PnL Percentages</label>
+                  </Switch>
+                </div>
+              </div>
+              <div className="flex justify-start items-center">
+                {/* Switch to toggle 2D PnL chart visibility */}
                 <div className="mb-4">
                   <Switch size="sm" color="success" isSelected={backChartEnabled} onChange={handleBackChartVisibility}>
                     <label className="text-gray-300 font-medium">Show 2D Background Chart</label>
@@ -308,7 +320,9 @@ const WalletTracker = () => {
       {walletData && currentPath && walletDetails && (
         <div className="flex justify-center items-center w-full">
           <div className="flex justify-center items-center max-w-screen-xl bg-[rgba(31,32,41,0.2)] text-white pl-8 pr-4 py-2 mt-8 rounded-lg shadow-lg">
-            {walletDetails}
+            <span className="max-w-full overflow-hidden whitespace-nowrap text-ellipsis">
+              {walletDetails}
+            </span>
             <button onClick={copyURLToClipboard}
               className="bg-[#1F2029] text-white hover:bg-[rgba(31,32,41,0.2)] ml-4 py-3 px-3 rounded-md cursor-pointer shadow-md">
               <svg className="w-[18px] h-[18px] dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -343,12 +357,12 @@ const WalletTracker = () => {
                       <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow"/>
                     </div>
                   </div>
-                  {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.pnl).toFixed(2) && parseFloat(walletData?.pnl).toFixed(2) < 0 && (
+                  {showPercentages && parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.pnl).toFixed(2) && parseFloat(walletData?.pnl).toFixed(2) < 0 && (
                     <div className="flex justify-center items-center text-xs font-medium text-shadow bg-red-100 text-red-800 mt-2 px-4 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
                       <NumberFlow className={`${widgetFontSize}`} value={calcPnLPerc(walletData?.startingBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                     </div>
                   )}
-                  {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.pnl).toFixed(2) && parseFloat(walletData?.pnl).toFixed(2) > 0 && (
+                  {showPercentages && parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.pnl).toFixed(2) && parseFloat(walletData?.pnl).toFixed(2) > 0 && (
                     <div className="flex justify-center items-center text-xs font-medium text-shadow bg-green-100 text-green-800 mt-2 px-4 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
                       <NumberFlow className={`${widgetFontSize}`} value={calcPnLPerc(walletData?.startingBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                     </div>
@@ -363,12 +377,12 @@ const WalletTracker = () => {
                         <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow"/>
                       </div>
                     </div>
-                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.weekPnl).toFixed(2) && parseFloat(walletData?.weekPnl).toFixed(2) < 0 && (
+                    {showPercentages && parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.weekPnl).toFixed(2) && parseFloat(walletData?.weekPnl).toFixed(2) < 0 && (
                       <div className="flex justify-center items-center text-xs font-medium text-shadow bg-red-100 text-red-800 mt-2 px-4 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
                         <NumberFlow className={`${widgetFontSize}`} value={calcPnLPerc(walletData?.weekStartBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                       </div>
                     )}
-                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.weekPnl).toFixed(2) && parseFloat(walletData?.weekPnl).toFixed(2) > 0 && (
+                    {showPercentages && parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.weekPnl).toFixed(2) && parseFloat(walletData?.weekPnl).toFixed(2) > 0 && (
                       <div className="flex justify-center items-center text-xs font-medium text-shadow bg-green-100 text-green-800 mt-2 px-4 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
                         <NumberFlow className={`${widgetFontSize}`} value={calcPnLPerc(walletData?.weekStartBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                       </div>
@@ -384,12 +398,12 @@ const WalletTracker = () => {
                         <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow"/>
                       </div>
                     </div>
-                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.monthPnl).toFixed(2) && parseFloat(walletData?.monthPnl).toFixed(2) < 0 && (
+                    {showPercentages && parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.monthPnl).toFixed(2) && parseFloat(walletData?.monthPnl).toFixed(2) < 0 && (
                       <div className="flex justify-center items-center text-xs font-medium text-shadow bg-red-100 text-red-800 mt-2 px-4 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
                         <NumberFlow className={`${widgetFontSize}`} value={calcPnLPerc(walletData?.monthStartBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                       </div>
                     )}
-                    {parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.monthPnl).toFixed(2) && parseFloat(walletData?.monthPnl).toFixed(2) > 0 && (
+                    {showPercentages && parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.monthPnl).toFixed(2) && parseFloat(walletData?.monthPnl).toFixed(2) > 0 && (
                       <div className="flex justify-center items-center text-xs font-medium text-shadow bg-green-100 text-green-800 mt-2 px-4 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
                         <NumberFlow className={`${widgetFontSize}`} value={calcPnLPerc(walletData?.monthStartBalance, walletData?.currentBalance)} format={{ style: 'percent', maximumFractionDigits: 2, signDisplay: 'always' }}/>
                       </div>
