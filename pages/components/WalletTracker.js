@@ -7,8 +7,10 @@ import ColorPicker from 'react-best-gradient-color-picker';
 
 import RemoveBackCSS from './RemoveBackCSS';
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
-import { calcPnLPerc } from "/utils/calcPnLPercentage";
+
 import getSolanaBalance from "/utils/solana-balance/wssSolBalance";
+import { calcPnLPerc } from "/utils/CalcPnLPercentage";
+import { encrypt } from "/utils/CryptString";
 
 export const PlatformRadio = (props) => {
   const {children, ...otherProps} = props;
@@ -133,11 +135,11 @@ const WalletTracker = () => {
   useEffect(() => {
     const walletData = { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor, platSelected };
 
-    // Convert data to query parameters for new tab navigation
-    const queryParams = new URLSearchParams(walletData).toString();
+    // Encrypt the string
+    const encryptedURLData = encrypt(JSON.stringify(walletData, null, 2));
 
     // Store URL with the data passed as query params
-    setWalletDetails(`${currentPath}components/WalletDetails?${queryParams}`);
+    setWalletDetails(`${currentPath}components/WalletDetails?encryptedData=${encryptedURLData.encryptedData}`);
 
     // Re-fetch when walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor or platSelected change
   }, [walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor, platSelected]);
@@ -277,7 +279,7 @@ const WalletTracker = () => {
               </div>
             </div>
             <div className="w-auto border-r-2 border-[#343641] mr-12 pr-12">
-              <ColorPicker className="rounded-lg shadow-md" value={backgroundColor} onChange={setBackgroundColor} hidePresets={true} hideInputs={true} hideEyeDrop={true} hideColorGuide={true} hideInputType={true}/>
+              <ColorPicker id="rbgcp-square-handle" instanceId="rbgcp-square-handle" className="rounded-lg shadow-md" value={backgroundColor} onChange={setBackgroundColor} hidePresets={true} hideInputs={true} hideEyeDrop={true} hideColorGuide={true} hideInputType={true}/>
             </div>
             <div className="w-auto">
               <div className="flex justify-left items-center">
@@ -302,7 +304,7 @@ const WalletTracker = () => {
       </div>
       {showRemoveBackCSS && (
         <div className="flex justify-center items-center w-full">
-          <div className="flex justify-center items-center max-w-screen-2xl bg-[rgba(31,32,41,0.2)] text-white pl-8 pr-4 py-2 mt-8 rounded-lg shadow-lg">
+          <div className="flex justify-center items-center max-w-screen-xl bg-[rgba(31,32,41,0.2)] text-white pl-8 pr-4 py-2 mt-8 rounded-lg shadow-lg">
             <div ref={backCSSRef}>
               <RemoveBackCSS/>
             </div>
@@ -317,7 +319,7 @@ const WalletTracker = () => {
       )}
       {walletData && currentPath && walletDetails && (
         <div className="flex justify-center items-center w-full">
-          <div className="flex justify-center items-center max-w-screen-2xl bg-[rgba(31,32,41,0.2)] text-white pl-8 pr-4 py-2 mt-8 rounded-lg shadow-lg">
+          <div className="flex justify-center items-center max-w-screen-xl bg-[rgba(31,32,41,0.2)] text-white pl-8 pr-4 py-2 mt-8 rounded-lg shadow-lg">
             {walletDetails}
             <button onClick={copyURLToClipboard}
               className="bg-[#1F2029] text-white hover:bg-[rgba(31,32,41,0.2)] ml-4 py-3 px-3 rounded-md cursor-pointer shadow-md">

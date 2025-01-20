@@ -4,9 +4,11 @@ import { useRouter } from 'next/router';
 import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
-import { calcPnLPerc } from "/utils/calcPnLPercentage";
-import getSolanaBalance from "/utils/solana-balance/wssSolBalance";
 import LineChart2D from './charts/LineChart2D.js';
+
+import { calcPnLPerc } from "/utils/CalcPnLPercentage";
+import getSolanaBalance from "/utils/solana-balance/wssSolBalance";
+import { decrypt } from "/utils/CryptString";
 
 export default function WalletDetails() {
     const router = useRouter();
@@ -20,22 +22,43 @@ export default function WalletDetails() {
 
     useEffect(() => {
         if (router.isReady) {
-            const { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor, platSelected } = router.query;
-            setLocWalletAddress(walletAddress); // Set the wallet address from URL
+            // Extract the query parameters from the URL
+            const { encryptedData } = router.query;
 
-            if (walletAddress) {
-                // Convert query parameters to the proper data structure
-                setWalletConfig({
-                    widgetPaddingSize: widgetPaddingSize?.toLowerCase(),
-                    widgetFontSize: widgetFontSize?.toLowerCase(),
-                    showWeekPnl: showWeekPnl?.toLowerCase() === 'true', // Convert to boolean
-                    showMonthPnl: showMonthPnl?.toLowerCase() === 'true', // Convert to boolean
-                    backChartEnabled: backChartEnabled?.toLowerCase() === 'true', // Convert to boolean
-                    backgroundColor: backgroundColor?.toLowerCase(),
-                    platSelected: platSelected?.toLowerCase()
-                });
+            if (encryptedData) { 
+                // Decrypt the data using the decrypt function
+                const decryptedURLData = decrypt(encryptedData);
+
+                 // Check if decryption were successful
+                if (decryptedURLData) {
+                    // Parse decrypted data into JSON
+                    const urlJsonData = JSON.parse(decryptedURLData);
+
+                    if (urlJsonData.walletAddress) {
+                        // Set the wallet address from URL
+                        setLocWalletAddress(urlJsonData.walletAddress);
+
+                        // Convert query parameters to the proper data structure
+                        setWalletConfig({
+                            widgetPaddingSize: urlJsonData.widgetPaddingSize?.toLowerCase(),
+                            widgetFontSize: urlJsonData.widgetFontSize?.toLowerCase(),
+                            showWeekPnl: urlJsonData.showWeekPnl,
+                            showMonthPnl: urlJsonData.showMonthPnl,
+                            backChartEnabled: urlJsonData.backChartEnabled,
+                            backgroundColor: urlJsonData.backgroundColor?.toLowerCase(),
+                            platSelected: urlJsonData.platSelected?.toLowerCase()
+                        });
+                    } else {
+                        router.push('/'); // Redirect back to home if data is missing
+                        return; // Exit early to avoid further processing
+                    }
+                } else {
+                    router.push('/'); // Redirect to home or another fallback page
+                    return; // Exit early to avoid further processing
+                }
             } else {
-                router.push('/'); // Redirect back to home if data is missing
+                router.push('/'); // Redirect to home or another fallback page
+                return; // Exit early to avoid further processing
             }
         }
     }, [router.isReady, router.query]);
