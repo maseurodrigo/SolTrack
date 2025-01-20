@@ -1,10 +1,6 @@
 import crypto from "crypto";
 import zlib from "zlib";
 
-// Define a secret key and initialization vector (IV)
-const SECRET_KEY = crypto.randomBytes(32); // 32 bytes for AES-256
-const IV = crypto.randomBytes(16); // 16 bytes for AES
-
 // URL-Safe Base64 Encoding
 const toUrlSafeBase64 = (str) => str.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
@@ -23,39 +19,31 @@ const decodeAndDecompress = (data) => {
   return zlib.inflateSync(buffer).toString();
 };
 
-// Encrypt function with compression
-export const encrypt = (text) => {
-  const cipher = crypto.createCipheriv("aes-256-cbc", SECRET_KEY, IV);
-  let encrypted = cipher.update(text, "utf8", "base64");
-  encrypted += cipher.final("base64");
-
-  // Store SECRET_KEY and IV in localStorage
-  localStorage.setItem("SECRET_KEY", SECRET_KEY.toString("base64"));
-  localStorage.setItem("IV", IV.toString("base64"));
-
-  return {
-    iv: toUrlSafeBase64(IV.toString("base64")),
-    encryptedData: compressAndEncode(encrypted)
-  };
+// Function to derive a key and IV from the passphrase
+const deriveKeyAndIV = (passphrase) => {
+  const hash = crypto.createHash("sha256").update(passphrase).digest(); // Hash the passphrase
+  const key = hash.slice(0, 32); // Use the first 32 bytes as the key (AES-256)
+  const iv = hash.slice(0, 16); // Use the first 16 bytes as the IV
+  return { key, iv };
 };
 
-// Decrypt function with decompression
-export const decrypt = (encryptedData) => {
+// Encrypt function
+export const encrypt = (passphrase, text) => {
+  const { key, iv } = deriveKeyAndIV(passphrase); // Derive key and IV from passphrase
+  const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+  let encrypted = cipher.update(text, "utf8", "base64");
+  encrypted += cipher.final("base64");
+  return compressAndEncode(encrypted); // Compress and encode the encrypted data
+};
+
+// Decrypt function
+export const decrypt = (passphrase, encryptedData) => {
   try {
-    // Retrieve SECRET_KEY and IV from localStorage
-    const SECRET_KEY = Buffer.from(localStorage.getItem("SECRET_KEY"), "base64");
-    const IV = Buffer.from(localStorage.getItem("IV"), "base64");
-
-    // Create a decipher instance with the same algorithm and key used during encryption
-    const decipher = crypto.createDecipheriv("aes-256-cbc", SECRET_KEY, IV);
-
-    // Decompress the encrypted data before decrypting
-    const compressedData = decodeAndDecompress(encryptedData);
-
-    // Decrypt the compressed data
+    const compressedData = decodeAndDecompress(encryptedData); // Decode and decompress
+    const { key, iv } = deriveKeyAndIV(passphrase); // Derive key and IV from passphrase
+    const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
     let decrypted = decipher.update(compressedData, "base64", "utf8");
     decrypted += decipher.final("utf8");
-
     return decrypted;
   } catch (error) { return null; }
 };

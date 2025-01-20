@@ -135,10 +135,10 @@ const WalletTracker = () => {
     const walletData = { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor, platSelected };
 
     // Encrypt the string
-    const encryptedURLData = encrypt(JSON.stringify(walletData, null, 2));
-
+    const encryptedURLData = encrypt(process.env.NEXT_PUBLIC_PASSPHRASE, JSON.stringify(walletData, null, 2));
+    
     // Store URL with the data passed as query params
-    setWalletDetails(`${currentPath}components/WalletDetails?encryptedData=${encryptedURLData.encryptedData}`);
+    setWalletDetails(`${currentPath}components/WalletDetails?encryptedData=${encryptedURLData}`);
 
     // Re-fetch when walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor or platSelected change
   }, [walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, backChartEnabled, backgroundColor, platSelected]);

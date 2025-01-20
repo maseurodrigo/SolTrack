@@ -54,9 +54,13 @@ To run this project, ensure you have the following installed:
    DATABASE_URL="postgresql://<user>:<password>@<host>:<port>/<database>"
    
    NEXT_PUBLIC_SOLANA_RPC_WS_URL="wss://mainnet.helius-rpc.com/?api-key=<your-api-key>"
+
+   NEXT_PUBLIC_PASSPHRASE="super_secret_passphrase_123"
    ```
    
-   Replace `<user>`, `<password>`, `<host>`, `<port>`, and `<database>` with your PostgreSQL credentials, and replace `<your-api-key>` with your Solana RPC WebSocket API key.
+   - Replace `<user>`, `<password>`, `<host>`, `<port>`, and `<database>` with your PostgreSQL credentials.
+   - Replace `<your-api-key>` with your Solana RPC WebSocket API key.
+   - Replace `"super_secret_passphrase_123"` with your custom encryption passphrase.
 
 4. **Initialize Prisma**:
 

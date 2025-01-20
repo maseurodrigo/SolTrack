@@ -27,8 +27,8 @@ export default function WalletDetails() {
 
             if (encryptedData) { 
                 // Decrypt the data using the decrypt function
-                const decryptedURLData = decrypt(encryptedData);
-
+                const decryptedURLData = decrypt(process.env.NEXT_PUBLIC_PASSPHRASE, encryptedData);
+                
                  // Check if decryption were successful
                 if (decryptedURLData) {
                     // Parse decrypted data into JSON
