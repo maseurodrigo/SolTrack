@@ -6,7 +6,7 @@ import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
 import LineChart2D from './charts/LineChart2D.js';
 
-import { calcPnLPerc } from "/utils/CalcPnLPercentage";
+import { calcPnLPerc } from "/utils/CalcPnLPercent";
 import getSolanaBalance from "/utils/solana-balance/wssSolBalance";
 import { decrypt } from "/utils/CryptString";
 

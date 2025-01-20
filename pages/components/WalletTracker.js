@@ -9,7 +9,7 @@ import RemoveBackCSS from './RemoveBackCSS';
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
 
 import getSolanaBalance from "/utils/solana-balance/wssSolBalance";
-import { calcPnLPerc } from "/utils/CalcPnLPercentage";
+import { calcPnLPerc } from "/utils/CalcPnLPercent";
 import { encrypt } from "/utils/CryptString";
 
 export const PlatformRadio = (props) => {
