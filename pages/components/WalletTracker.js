@@ -41,12 +41,11 @@ const WalletTracker = () => {
   const [showWeekPnl, setShowWeekPnl] = useState(false); // State to toggle weekly PnL
   const [showMonthPnl, setShowMonthPnl] = useState(false); // State to toggle monthly PnL
   const [backChartEnabled, setBackChartEnabled] = useState(true); // State to toggle PnL 2D PnL chart
-  const [pnlChartEnabled, setPnLChartEnabled] = useState(false); // State to toggle PnL 3D PnL chart
   const [showRemoveBackCSS, setRemoveBackCSS] = useState(false); // State to toggle background CSS code
   const [backgroundColor, setBackgroundColor] = useState('rgba(31, 32, 41, 1)'); // State to change background widget color
   const [platSelected, setPlatSelected] = useState(""); // State to toggle selected platform
   const [currentPath, setCurrentPath] = useState(""); // Get the current URL as a string
-
+  
   const shownErrors = new Set(); // Function to track shown error messages
   const backCSSRef = useRef(null); // Reference to access DOM element rendered by RemoveBackCSS
 
@@ -164,9 +163,6 @@ const WalletTracker = () => {
   // Toggle 2D PnL chart visibility
   const handleBackChartVisibility = () => { setBackChartEnabled((prev) => !prev); };
 
-  // Toggle 3D PnL chart visibility
-  const handlePnLChartVisibility = () => { setPnLChartEnabled((prev) => !prev); };
-
   // Toggle background CSS code
   const handleRemoveBackCSS = () => { setRemoveBackCSS((prev) => !prev); };
 
@@ -258,14 +254,6 @@ const WalletTracker = () => {
                 <div className="mb-4">
                   <Switch size="sm" color="success" isSelected={backChartEnabled} onChange={handleBackChartVisibility}>
                     <label className="text-gray-300 font-medium">Show 2D Background Chart</label>
-                  </Switch>
-                </div>
-              </div>
-              <div className="flex justify-start items-center">
-                {/* Checkbox to toggle 3D PnL chart visibility */}
-                <div className="mb-4">
-                  <Switch size="sm" color="success" isSelected={pnlChartEnabled} onChange={handlePnLChartVisibility} isDisabled>
-                    <label className="text-gray-300 font-medium">Show 3D PnL Chart (Every 10 Trades)</label>
                   </Switch>
                 </div>
               </div>
