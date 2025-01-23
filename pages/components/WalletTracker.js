@@ -55,7 +55,7 @@ const WalletTracker = () => {
 
   // Fetch balance using Solana RPC via WebSocket for real-time updates
   const currentBalance = getSolanaBalance(walletAddress);
-
+  
   useEffect(() => {
     // Access window object
     if (typeof window !== 'undefined') { setCurrentPath(window.location.href); }

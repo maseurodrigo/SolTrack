@@ -6,18 +6,24 @@ const SOLANA_RPC_WS = process.env.NEXT_PUBLIC_SOLANA_RPC_WS_URL;
 export default function getSolanaBalance(walletAddress) {
 
   // Default value is null until walletAddress is set
-  const [balance, setBalance] = useState(null);
+  const [currentBalance, setCurrentBalance] = useState(null);
 
   useEffect(() => {
     if (!walletAddress || !SOLANA_RPC_WS) return;
 
     let wsConn; // WebSocket connection
-    let keepAliveInterval; // Variable to hold the keep-alive interval ID
+    let keepAliveInterval; // Keep-alive interval ID
+    let reconnectTimeout; // Timeout ID for reconnection
+    let isManuallyClosed = false; // Flag to prevent reconnect on manual close
 
-    try {
+    const connectWebSocket = () => {
+
+      // Create a new WebSocket connection
       wsConn = new WebSocket(SOLANA_RPC_WS);
-      
+
+      // WebSocket open event
       wsConn.onopen = () => {
+        
         // Subscribe to account changes for the wallet address
         const subscriptionPayload = {
           jsonrpc: "2.0",
@@ -25,56 +31,64 @@ export default function getSolanaBalance(walletAddress) {
           method: "accountSubscribe",
           params: [walletAddress, { encoding: "jsonParsed" }]
         };
+
         wsConn.send(JSON.stringify(subscriptionPayload));
 
-        // Start a keep-alive interval to prevent connection timeouts
+        // Start a keep-alive interval to prevent timeouts
         keepAliveInterval = setInterval(() => {
-          if (wsConn.readyState === WebSocket.OPEN) { 
+          if (wsConn && wsConn.readyState === WebSocket.OPEN) {
             wsConn.send(JSON.stringify({ jsonrpc: "2.0", method: "ping" }));
           }
-        }, 30000); // Ping every 30 seconds
+        }, 30000); // Every 30 seconds
       };
-      
+
+      // WebSocket message event
       wsConn.onmessage = (event) => {
         const data = JSON.parse(event.data.toString('utf8'));
 
+        // Update balance whenever the account changes
         if (data?.params?.result?.value?.lamports !== undefined) {
-          // Update balance whenever the account changes
           const lamports = data.params.result.value.lamports;
-          setBalance(lamports / 1e9); // Convert lamports to SOL
+          setCurrentBalance(lamports / 1e9); // Convert lamports to SOL
         }
       };
-      
+
       // Handle WebSocket connection errors
       wsConn.onerror = (error) => { console.error("Solana RPC WebSocket Error:", error); };
-      
-      return () => {
-        // Clear keep-alive interval on cleanup
-        if (keepAliveInterval) clearInterval(keepAliveInterval);
 
-        // Cleanup the WebSocket connection on unmount or wallet change
-        if (wsConn && wsConn.readyState === WebSocket.OPEN) {
-          const unsubscribePayload = {
-            jsonrpc: "2.0",
-            id: 1,
-            method: "accountUnsubscribe",
-            params: [1] // Use the same subscription ID as in `id`
-          };
-          wsConn.send(JSON.stringify(unsubscribePayload));
-          wsConn.close();
+      // WebSocket close event
+      wsConn.onclose = () => {
+
+        // Attempt to reconnect if the connection was not manually closed
+        if (!isManuallyClosed) { 
+          console.log("Reconnecting WS..."); 
+          reconnectTimeout = setTimeout(connectWebSocket, 5000); 
         }
       };
-    } catch (connectionError) {
-      // Catch any errors that occur while establishing the WebSocket connection
-      console.error("Failed to establish Solana RPC WebSocket connection: ", connectionError);
+    };
 
-      // Cleanup if an error occurs
-      if (keepAliveInterval) clearInterval(keepAliveInterval);
-      
-      // Return a no-op cleanup function in case of failure
-      return () => {};
-    }
-  }, [walletAddress]); // Re-run the effect when walletAddress changes
+    // Establish the WebSocket connection
+    connectWebSocket();
+
+    return () => {
+      isManuallyClosed = true; // Prevent reconnection
+      if (keepAliveInterval) clearInterval(keepAliveInterval); // Clear keep-alive interval
+      if (reconnectTimeout) clearTimeout(reconnectTimeout); // Clear reconnect timeout
+
+      // Unsubscribe and close the WebSocket
+      if (wsConn && wsConn.readyState === WebSocket.OPEN) {
+        const unsubscribePayload = {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "accountUnsubscribe",
+          params: [1] // Use the same subscription ID as in `id`
+        };
+        
+        wsConn.send(JSON.stringify(unsubscribePayload));
+        wsConn.close();
+      }
+    };
+  }, [walletAddress]);
   
-  return balance;
+  return currentBalance;
 }
