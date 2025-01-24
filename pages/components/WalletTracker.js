@@ -34,7 +34,7 @@ export const PlatformRadio = (props) => {
 const WalletTracker = () => {
   const [walletData, setWalletData] = useState(null);
   const [walletDetails, setWalletDetails] = useState("");
-  const [traderType, setTraderType] = useState("http"); // State to set the protocol for updating the balance
+  const [traderType, setTraderType] = useState("wss"); // State to set the protocol for updating the balance
   const [inputAddress, setInputAddress] = useState(""); // State for the form input
   const [walletAddress, setWalletAddress] = useState(""); // State for wallet address input
   const [widgetPaddingSize, setWidgetPaddingSize] = useState("p-8"); // State to set widget padding sizes
@@ -214,7 +214,7 @@ const WalletTracker = () => {
           <div className="flex justify-center items-center border-b-2 border-[#343641] mb-12 pb-12">
             <div className="w-1/5 border-r-2 border-[#343641] mr-12 pr-12">
               <div className="flex justify-left items-center">
-                <RadioGroup orientation="vertical" color="success" defaultValue="http" onValueChange={setTraderType}>
+                <RadioGroup orientation="vertical" color="success" defaultValue="wss" onValueChange={setTraderType}>
                   <Tooltip content="Faster Balance Update" color="success" placement="right">
                     <Radio className="mb-0.5" value="wss">
                       <label className="text-gray-300 font-medium">Fast-Paced Trader</label>
