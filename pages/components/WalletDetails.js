@@ -40,6 +40,7 @@ export default function WalletDetails() {
 
                         // Convert query parameters to the proper data structure
                         setWalletConfig({
+                            traderType: urlJsonData.traderType?.toLowerCase(),
                             widgetPaddingSize: urlJsonData.widgetPaddingSize?.toLowerCase(),
                             widgetFontSize: urlJsonData.widgetFontSize?.toLowerCase(),
                             showWeekPnl: urlJsonData.showWeekPnl,
@@ -49,6 +50,16 @@ export default function WalletDetails() {
                             backgroundColor: urlJsonData.backgroundColor?.toLowerCase(),
                             platSelected: urlJsonData.platSelected?.toLowerCase()
                         });
+
+                        if(urlJsonData.traderType === "wss") { 
+                            toast('If the balance stops updating, go back to the dashboard and change the traders pace setting',
+                                {
+                                    duration: 5000,
+                                    style: { borderRadius: '10px', background: '#333', color: '#fff' },
+                                    icon: '⚙️'
+                                }
+                            );
+                        }
                     } else {
                         router.push('/'); // Redirect back to home if data is missing
                         return; // Exit early to avoid further processing
@@ -65,8 +76,43 @@ export default function WalletDetails() {
     }, [router.isReady, router.query]);
 
     useEffect(() => {
-        // If theres no wallet address, don't proceed
+        // If theres a valid wallet address proceed
         if (locWalletAddress != null && (typeof locWalletAddress !== 'string' || locWalletAddress.trim() !== '')) {
+            const fetchHttpData = async () => {
+                try {
+                    // Send a request with wallet address and current balance as query parameters
+                    const response = await fetch(`/api/wallet_data?wallet=${locWalletAddress}&currentBalance=${null}`);
+
+                    // If response is not okay, parse the error response
+                    if (!response.ok) {
+                        const errorData = await response.json();  // Parse JSON to get error details
+                        toast.error(errorData.error);
+                        return;
+                    }
+                    
+                    // Parse the response data and update the wallet data state
+                    const data = await response.json();
+                    setWalletData(data);
+                } catch (error) {
+                    toast.error(error.message);
+                }
+            };
+
+            fetchHttpData(); // Call the async function
+
+            if (walletConfig.traderType === "http") {
+                // Set up an interval to fetch HTTP data every 5 seconds
+                const interval = setInterval(fetchHttpData, 5000);
+                
+                // Cleanup the interval when the component is unmounted or dependencies change
+                return () => clearInterval(interval);
+            }
+        }
+    }, [locWalletAddress]); // Re-fetch when walletAddress change
+    
+    useEffect(() => {
+        // If theres a valid wallet address proceed
+        if (walletConfig && walletConfig.traderType === "wss" && locWalletAddress != null && (typeof locWalletAddress !== 'string' || locWalletAddress.trim() !== '')) {
             const fetchData = async () => {
                 try {
                     // Send a request with wallet address and current balance as query parameters
@@ -83,13 +129,13 @@ export default function WalletDetails() {
                     const data = await response.json();
                     setWalletData(data);
                 } catch (error) {
-                    toast.error(error);
+                    toast.error(error.message);
                 }
             };
             fetchData(); // Call the async function
         }
-    }, [locWalletAddress, currentBalance]); // Re-fetch when walletAddress or currentBalance change
-    
+    }, [currentBalance]); // Re-fetch when currentBalance change
+
     useEffect(() => {
         if (walletData?.pnl !== undefined) {
             

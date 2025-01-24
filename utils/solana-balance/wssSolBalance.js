@@ -29,7 +29,7 @@ export default function getSolanaBalance(walletAddress) {
           jsonrpc: "2.0",
           id: 1,
           method: "accountSubscribe",
-          params: [walletAddress, { encoding: "jsonParsed" }]
+          params: [walletAddress, { encoding: "jsonParsed", commitment: "confirmed" }]
         };
 
         wsConn.send(JSON.stringify(subscriptionPayload));
@@ -60,10 +60,7 @@ export default function getSolanaBalance(walletAddress) {
       wsConn.onclose = () => {
 
         // Attempt to reconnect if the connection was not manually closed
-        if (!isManuallyClosed) { 
-          console.log("Reconnecting WS..."); 
-          reconnectTimeout = setTimeout(connectWebSocket, 5000); 
-        }
+        if (!isManuallyClosed) { reconnectTimeout = setTimeout(connectWebSocket, 5000); }
       };
     };
 

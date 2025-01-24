@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { toast } from 'react-hot-toast';
-import { Switch, RadioGroup, Radio, cn } from "@nextui-org/react";
+import { Switch, RadioGroup, Radio, Tooltip, cn } from "@nextui-org/react";
 import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 import Image from 'next/image';
 import ColorPicker from 'react-best-gradient-color-picker';
@@ -34,6 +34,7 @@ export const PlatformRadio = (props) => {
 const WalletTracker = () => {
   const [walletData, setWalletData] = useState(null);
   const [walletDetails, setWalletDetails] = useState("");
+  const [traderType, setTraderType] = useState("http"); // State to set the protocol for updating the balance
   const [inputAddress, setInputAddress] = useState(""); // State for the form input
   const [walletAddress, setWalletAddress] = useState(""); // State for wallet address input
   const [widgetPaddingSize, setWidgetPaddingSize] = useState("p-8"); // State to set widget padding sizes
@@ -56,48 +57,74 @@ const WalletTracker = () => {
   // Fetch balance using Solana RPC via WebSocket for real-time updates
   const currentBalance = getSolanaBalance(walletAddress);
   
+  // Set up the HTTP interval
+  let httpInterval = null;
+
+  const fetchHttpData = async () => {
+    try {
+      // If theres a valid wallet address proceed
+      if (walletAddress != null && (typeof walletAddress !== 'string' || walletAddress.trim() !== ''))
+      {
+        // Send a request with wallet address and current balance as query parameters
+        const response = await fetch(`/api/wallet_data?wallet=${walletAddress}&currentBalance=${null}`);
+
+        // If response is not okay, parse the error response
+        if (!response.ok) {
+          const errorData = await response.json();  // Parse JSON to get error details
+
+          // Check if error message has already been shown using the Set
+          if (!hasShownError(errorData.error)) {
+            toast.error(errorData.error);
+            setHasShownError(errorData.error);
+          }
+          return;
+        }
+        
+        const data = await response.json();
+        setWalletData(data);
+      } else 
+      {
+        // Check if error message has already been shown using the Set
+        if (!hasShownError("Wallet address required")) {
+          toast.error("Wallet address required");
+          setHasShownError("Wallet address required");
+        }
+        return;
+      }
+    } catch (err) {
+      // Check if error message has already been shown using the Set
+      if (!hasShownError(err.message)) {
+        toast.error(err.message);
+        setHasShownError(err.message);
+      }
+    }
+  };
+
   useEffect(() => {
     // Access window object
     if (typeof window !== 'undefined') { setCurrentPath(window.location.href); }
   }, []);
 
   useEffect(() => {
-    // If theres no wallet address, don't proceed
-    if (walletAddress != null && (typeof walletAddress !== 'string' || walletAddress.trim() !== '')) { 
-      const fetchData = async () => {
-        try {
-          // Send a request with wallet address and current balance as query parameters
-          const response = await fetch(`/api/wallet_data?wallet=${walletAddress}&currentBalance=${null}`);
 
-          // If response is not okay, parse the error response
-          if (!response.ok) {
-            const errorData = await response.json();  // Parse JSON to get error details
-    
-            // Check if error message has already been shown using the Set
-            if (!hasShownError(errorData.error)) {
-              toast.error(errorData.error);
-              setHasShownError(errorData.error);
-            }
-            return;
-          }
-          
-          const data = await response.json();
-          setWalletData(data);
-        } catch (err) {
-          // Check if error message has already been shown using the Set
-          if (!hasShownError(err.message)) {
-            toast.error(err.message);
-            setHasShownError(err.message);
-          }
-        }
-      };
-      fetchData();
+    // Clear errors when walletAddress changes
+    shownErrors.clear();
+
+    // Fetch data when walletAddress changes
+    if (walletAddress) { fetchHttpData(); }
+
+    if (traderType === "http") {
+      // Set up an interval to fetch HTTP data every 5 seconds
+      httpInterval = setInterval(() => { fetchHttpData(); }, 5000);
+
+      // Cleanup the interval when the component is unmounted or dependencies change
+      return () => clearInterval(httpInterval);
     }
-  }, [walletAddress]); // Re-fetch when walletAddress change
+  }, [traderType, walletAddress]); // Re-fetch when traderType or walletAddress change
 
   useEffect(() => {
-    // If theres no wallet address, don't proceed
-    if (walletAddress != null && (typeof walletAddress !== 'string' || walletAddress.trim() !== '')) { 
+    // If theres a valid wallet address proceed
+    if (traderType === "wss" && walletAddress != null && (typeof walletAddress !== 'string' || walletAddress.trim() !== '')) { 
       const fetchData = async () => {
         try {
           // Send a request with wallet address and current balance as query parameters
@@ -133,7 +160,7 @@ const WalletTracker = () => {
   const handleWalletAddressChange = (event) => { setInputAddress(event.target.value); };
 
   useEffect(() => {
-    const walletData = { walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, platSelected };
+    const walletData = { traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, platSelected };
 
     // Encrypt the string
     const encryptedURLData = encrypt(process.env.NEXT_PUBLIC_PASSPHRASE, JSON.stringify(walletData, null, 2));
@@ -141,8 +168,8 @@ const WalletTracker = () => {
     // Store URL with the data passed as query params
     setWalletDetails(`${currentPath}components/WalletDetails?encryptedData=${encryptedURLData}`);
 
-    // Re-fetch when walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor or platSelected change
-  }, [walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, platSelected]);
+    // Re-fetch when traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor or platSelected change
+  }, [traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, platSelected]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -184,22 +211,40 @@ const WalletTracker = () => {
     <div className="pt-12">
       <div className="flex justify-center items-center">
         <div className="bg-[rgba(31,32,41,0.2)] px-24 py-12 rounded-lg max-w-fit shadow-md">
-          {/* Wallet Address Input Form */}
-          <form onSubmit={handleSubmit} className="flex justify-center items-center">
-            <input
-              type="text"
-              placeholder="Enter SOL Address"
-              value={inputAddress}
-              onChange={handleWalletAddressChange}
-              className="bg-[#1F2029] text-gray-300 border border-[#343641] rounded-lg w-4/5 px-4 py-3 transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-opacity-50 focus:ring-green-800 focus:shadow-xl" />
-            <button type="submit" className="bg-green-600 hover:bg-green-500 ml-2 py-3 px-3 rounded-md cursor-pointer shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </svg>
-            </button>
-          </form>
-          <div className="flex justify-center items-center mt-12">
+          <div className="flex justify-center items-center border-b-2 border-[#343641] mb-12 pb-12">
+            <div className="w-1/5 border-r-2 border-[#343641] mr-12 pr-12">
+              <div className="flex justify-left items-center">
+                <RadioGroup orientation="vertical" color="success" defaultValue="http" onValueChange={setTraderType}>
+                  <Tooltip content="Faster Balance Update" color="success" placement="right">
+                    <Radio className="mb-0.5" value="wss">
+                      <label className="text-gray-300 font-medium">Fast-Paced Trader</label>
+                    </Radio>
+                  </Tooltip>
+                  <Tooltip content="Accurate Balance Update" color="success" placement="right">
+                    <Radio value="http">
+                      <label className="text-gray-300 font-medium">Slow-Paced Trader</label>
+                    </Radio>
+                  </Tooltip>
+                </RadioGroup>
+              </div>
+            </div>
+            {/* Wallet Address Input Form */}
+            <form onSubmit={handleSubmit} className="w-4/5">
+              <input
+                type="text"
+                placeholder="Enter SOL Address"
+                value={inputAddress}
+                onChange={handleWalletAddressChange}
+                className="bg-[#1F2029] text-gray-300 border border-[#343641] rounded-lg w-4/5 px-4 py-3 transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-opacity-50 focus:ring-green-800 focus:shadow-xl" />
+              <button type="submit" className="bg-green-600 hover:bg-green-500 ml-2 py-3 px-3 rounded-md cursor-pointer shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </svg>
+              </button>
+            </form>
+          </div>          
+          <div className={`flex justify-center items-center ${walletAddress != null && (typeof walletAddress !== 'string' || walletAddress.trim() !== '') ? "" : "opacity-25 pointer-events-none"}`}>
             <div className="w-auto border-r-2 border-[#343641] mr-12 pr-12">
               <div className="flex justify-left items-center">
                 <RadioGroup orientation="vertical" color="success" defaultValue="p-8" onValueChange={setWidgetPaddingSize}>
