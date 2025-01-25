@@ -6,6 +6,8 @@
 
 ![SolTrack Dashboard](./soltrack.png)
 
+![SolTrack Widget](./soltrack.gif)
+
 ---
 
 ## Features
