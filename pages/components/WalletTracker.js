@@ -385,7 +385,7 @@ const WalletTracker = () => {
                   </div>
                   <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                     <div style={{ '--number-flow-char-height': '0.85em' }} className="flex items-center gap-4 font-semibold">
-                      {parseFloat(walletData?.pnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.pnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className="drop-shadow-xl"/>
+                      {parseFloat(walletData?.pnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.pnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className={`${parseFloat(walletData?.pnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.pnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'} drop-shadow-xl`}/>
                       <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
                     </div>
                   </div>
@@ -407,7 +407,7 @@ const WalletTracker = () => {
                     </div>
                     <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                       <div style={{ '--number-flow-char-height': '0.85em' }} className="flex items-center gap-4 font-semibold">
-                        {parseFloat(walletData?.weekPnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.weekPnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className="drop-shadow-xl"/>
+                        {parseFloat(walletData?.weekPnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.weekPnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className={`${parseFloat(walletData?.weekPnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.weekPnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'} drop-shadow-xl`}/>
                         <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
                       </div>
                     </div>
@@ -430,7 +430,7 @@ const WalletTracker = () => {
                     </div>
                     <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                       <div style={{ '--number-flow-char-height': '0.85em' }} className="flex items-center gap-4 font-semibold">
-                        {parseFloat(walletData?.monthPnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.monthPnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className="drop-shadow-xl"/>
+                        {parseFloat(walletData?.monthPnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.monthPnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className={`${parseFloat(walletData?.monthPnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.monthPnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'} drop-shadow-xl`}/>
                         <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
                       </div>
                     </div>
