@@ -316,8 +316,11 @@ const WalletTracker = () => {
                   <PlatformRadio className="mb-4" color="success" value="bullx">
                     <Image alt="bullx" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/bullx.png"} priority={false}/>
                   </PlatformRadio>
-                  <PlatformRadio color="success" value="nova">
+                  <PlatformRadio className="mb-4" color="success" value="nova">
                     <Image alt="nova" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/nova.png"} priority={false}/>
+                  </PlatformRadio>
+                  <PlatformRadio color="success" value="axiom">
+                    <Image alt="axiom" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/axiom.png"} priority={false}/>
                   </PlatformRadio>
                   <Input type="text" label="Logo URL" value={inputLogoURL} onValueChange={setInputLogoURL} className="text-gray-300 mt-6"/>
                 </RadioGroup>
