@@ -77,9 +77,9 @@ export default async function handler(req, res) {
   }
   
   // Recalculate weekly and monthly PnL if the date changes
-  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+  const startOfWeek = new Date(now.setDate(now.getDate() - ((now.getDay() + 6) % 7)));
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
+  
   if (!data.weekStartDate || data.weekStartDate.toDateString() !== startOfWeek.toDateString()) {
     data.weekStartDate = startOfWeek;
     data.weekStartBalance = localBalance;
