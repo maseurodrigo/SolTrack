@@ -2,6 +2,7 @@ import { React, useEffect, useState, useRef } from "react";
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/router';
 import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
+import { motion } from "motion/react";
 
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
 import LineChart2D from './charts/LineChart2D.js';
@@ -171,13 +172,16 @@ export default function WalletDetails() {
                                     <LineChart2D data={tradeData} />
                                 )}
                                 {(walletConfig.inputLogoURL || (walletConfig.platSelected && walletConfig.platSelected !== "noplat")) && (
-                                    <div className="flex justify-center items-center text-shadow">
+                                    <motion.div
+                                        animate={{ scale: [1, 0.5, 1], rotate: [0, 720, 0] }}
+                                        transition={{ ease: "easeInOut", duration: 10, repeat: Infinity, repeatDelay: 30 }}
+                                        className="flex justify-center items-center text-shadow">
                                         {walletConfig.inputLogoURL ? (
                                             <img src={walletConfig.inputLogoURL} alt="Custom URL Logo" className="w-auto h-auto max-w-24 max-h-24 ml-4 mr-2 rounded-full filter drop-shadow-xl"/>
                                         ) : (
                                             <img src={`/${walletConfig.platSelected}.png`} alt={walletConfig.platSelected} className="w-auto h-auto max-w-32 max-h-32 filter drop-shadow-xl"/>
                                         )}
-                                    </div>
+                                    </motion.div>
                                 )}
                                 <div className={`text-9xl ${walletConfig.widgetPaddingSize}`}>
                                     <div className={`${walletConfig.widgetFontSize} text-center uppercase text-gray-500 tracking-wider mb-2`}>

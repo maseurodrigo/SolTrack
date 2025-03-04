@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { toast } from 'react-hot-toast';
 import { Switch, RadioGroup, Radio, Tooltip, Input, cn } from "@nextui-org/react";
 import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
+import { motion } from "motion/react";
 import Image from 'next/image';
 import ColorPicker from 'react-best-gradient-color-picker';
 
@@ -365,13 +366,16 @@ const WalletTracker = () => {
             <AnimatedBorderTrail trailSize="lg" trailColor={parseFloat(walletData?.pnl).toFixed(2) < 0 ? "red" : parseFloat(walletData?.pnl).toFixed(2) > 0 ? "green" : "grey"}>
               <div className="flex justify-center items-center text-white max-w-fit px-4 rounded-lg shadow-2xl" style={{ background: `${backgroundColor}` }}>
                 {(inputLogoURL || (platSelected && platSelected !== "noplat")) && (
-                  <div className="flex justify-center items-center text-shadow">
+                  <motion.div
+                    animate={{ scale: [1, 0.5, 1], rotate: [0, 720, 0] }}
+                    transition={{ ease: "easeInOut", duration: 10, repeat: Infinity, repeatDelay: 30 }}
+                    className="flex justify-center items-center text-shadow">
                     {inputLogoURL ? (
                       <img src={inputLogoURL} alt="Custom URL Logo" className="w-auto h-auto max-w-24 max-h-24 ml-4 mr-2 rounded-full filter drop-shadow-xl"/>
                     ) : (
                       <img src={`/${platSelected}.png`} alt={platSelected} className="w-auto h-auto max-w-32 max-h-32 filter drop-shadow-xl"/>
                     )}
-                  </div>
+                  </motion.div>
                 )}
                 <div className={`text-9xl ${widgetPaddingSize}`}>
                   <div className={`${widgetFontSize} uppercase text-gray-500 tracking-wider mb-2`}>
