@@ -368,7 +368,7 @@ const WalletTracker = () => {
                 {(inputLogoURL || (platSelected && platSelected !== "noplat")) && (
                   <motion.div
                     animate={{ scale: [1, 0.5, 1], rotate: [0, 720, 0] }}
-                    transition={{ ease: "easeInOut", duration: 10, repeat: Infinity, repeatDelay: 30 }}
+                    transition={{ ease: "easeInOut", duration: 10, repeat: Infinity, repeatDelay: 60 }}
                     className="flex justify-center items-center text-shadow">
                     {inputLogoURL ? (
                       <img src={inputLogoURL} alt="Custom URL Logo" className="w-auto h-auto max-w-24 max-h-24 ml-4 mr-2 rounded-full filter drop-shadow-xl"/>
