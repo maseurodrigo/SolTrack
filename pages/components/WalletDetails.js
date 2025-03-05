@@ -173,7 +173,13 @@ export default function WalletDetails() {
                                 )}
                                 {(walletConfig.inputLogoURL || (walletConfig.platSelected && walletConfig.platSelected !== "noplat")) && (
                                     <motion.div
-                                        animate={{ scale: [1, 0.5, 1], rotate: [0, 720, 0] }}
+                                        animate={{
+                                            scale: [1, 1.8, 0.3, 2.3, 1, 1.5, 0.5, 1.7, 1.2, 1],
+                                            rotate: [0, 45, -45, 90, -90, 180, -180, 270, 360, 0],
+                                            x: [0, 320, 0, 320, 0],
+                                            y: [0, 0, 80, 80, 0],
+                                            opacity: [1, 0.6, 1, 0.8, 1]
+                                        }}
                                         transition={{ ease: "easeInOut", duration: 10, repeat: Infinity, repeatDelay: 60 }}
                                         className="flex justify-center items-center text-shadow">
                                         {walletConfig.inputLogoURL ? (
