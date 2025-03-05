@@ -368,13 +368,13 @@ const WalletTracker = () => {
                 {(inputLogoURL || (platSelected && platSelected !== "noplat")) && (
                   <motion.div
                     animate={{
-                      scale: [1, 1.8, 0.3, 2.3, 1, 1.5, 0.5, 1.7, 1.2, 1],
+                      scale: [1, 1.6, 0.2, 2, 1, 1.4, 0.4, 1.6, 1.2, 1],
                       rotate: [0, 45, -45, 90, -90, 180, -180, 270, 360, 0],
                       x: [0, 320, 0, 320, 0],
-                      y: [0, 0, 80, 80, 0],
-                      opacity: [1, 0.6, 1, 0.8, 1]
+                      y: [0, 0, 60, 60, 0],
+                      opacity: [1, 0.4, 0.8, 0.6, 1]
                     }}
-                    transition={{ ease: "easeInOut", duration: 10, repeat: Infinity, repeatDelay: 60 }}
+                    transition={{ ease: "easeInOut", duration: 12, repeat: Infinity, repeatDelay: 120 }}
                     className="flex justify-center items-center text-shadow">
                     {inputLogoURL ? (
                       <img src={inputLogoURL} alt="Custom URL Logo" className="w-auto h-auto max-w-24 max-h-24 ml-4 mr-2 rounded-full filter drop-shadow-xl"/>
