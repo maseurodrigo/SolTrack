@@ -370,11 +370,11 @@ const WalletTracker = () => {
                     animate={{
                       scale: [1, 1.6, 0.4, 1.8, 1, 1.4, 0.6, 1.6, 1.2, 1],
                       rotate: [0, 45, -45, 90, -90, 180, -180, 360, -360, 0],
-                      x: [0, 280, 140, 280, 0],
+                      x: [0, 300, 150, 300, 0],
                       y: [0, 0, 60, 0, -60, 0],
                       opacity: [1, 0.4, 0.6, 0.4, 1]
                     }}
-                    transition={{ ease: "easeInOut", duration: 12, repeat: Infinity, repeatDelay: 120 }}
+                    transition={{ ease: "easeInOut", duration: 12, repeat: Infinity, repeatDelay: 300 }}
                     className="flex justify-center items-center text-shadow">
                     {inputLogoURL ? (
                       <img src={inputLogoURL} alt="Custom URL Logo" className="w-auto h-auto max-w-24 max-h-24 ml-4 mr-2 rounded-full filter drop-shadow-xl"/>
