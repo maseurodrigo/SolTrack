@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { toast } from 'react-hot-toast';
-import { Switch, RadioGroup, Radio, Tooltip, Input, cn } from "@nextui-org/react";
+import { Tabs, Tab, Switch, RadioGroup, Radio, Tooltip, Input, cn } from "@nextui-org/react";
 import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 import { motion } from "motion/react";
 import Image from 'next/image';
@@ -192,9 +192,9 @@ const WalletTracker = () => {
   }
 
   return (
-    <div className="pt-12">
+    <div className="pt-12 px-36">
       <div className="flex justify-center items-center">
-        <div className="bg-[rgba(31,32,41,0.2)] px-24 py-12 rounded-lg max-w-fit shadow-md">
+        <div className="bg-[rgba(31,32,41,0.2)] px-24 py-12 w-full rounded-lg shadow-md">
           <div className="flex justify-center items-center border-b-2 border-[#343641] mb-12 pb-12">
             <div className="w-1/5 border-r-2 border-[#343641] mr-12 pr-12">
               <div className="flex justify-left items-center">
@@ -223,110 +223,122 @@ const WalletTracker = () => {
               </button>
             </form>
           </div>          
-          <div className={`flex justify-center items-center ${walletAddress != null && (typeof walletAddress !== 'string' || walletAddress.trim() !== '') ? "" : "opacity-25 pointer-events-none"}`}>
-            <div className="w-auto border-r-2 border-[#343641] mr-12 pr-12">
-              <div className="flex justify-left items-center">
-                <RadioGroup orientation="vertical" color="success" defaultValue="p-8" onValueChange={setWidgetPaddingSize}>
-                  <Radio className="mb-0.5" value="p-4">
-                    <label className="text-gray-300 font-medium">Padding SM</label>
-                  </Radio>
-                  <Radio className="mb-0.5" value="p-6">
-                    <label className="text-gray-300 font-medium">Padding LG</label>
-                  </Radio>
-                  <Radio className="mb-0.5" value="p-8">
-                    <label className="text-gray-300 font-medium">Padding XL</label>
-                  </Radio>
-                  <Radio value="p-10">
-                    <label className="text-gray-300 font-medium">Padding 2XL</label>
-                  </Radio>
-                </RadioGroup>
-              </div>
-            </div>
-            <div className="w-auto border-r-2 border-[#343641] mr-12 pr-12">
-              <div className="flex justify-left items-center">
-                <RadioGroup orientation="vertical" color="success" defaultValue="text-sm" onValueChange={setWidgetFontSize}>
-                  <Radio className="mb-0.5" value="text-sm">
-                    <label className="text-gray-300 font-medium">Font Size SM</label>
-                  </Radio>
-                  <Radio className="mb-0.5" value="text-lg">
-                    <label className="text-gray-300 font-medium">Font Size LG</label>
-                  </Radio>
-                  <Radio className="mb-0.5" value="text-xl">
-                    <label className="text-gray-300 font-medium">Font Size XL</label>
-                  </Radio>
-                  <Radio value="text-2xl">
-                    <label className="text-gray-300 font-medium">Font Size 2XL</label>
-                  </Radio>
-                </RadioGroup>
-              </div>
-            </div>
-            <div className="w-auto border-r-2 border-[#343641] mr-12 pr-12">
-              <div className="flex justify-start items-center">
-                {/* Switch to toggle weekly PnL */}
-                <div className="mb-4">
-                  <Switch size="sm" color="success" isSelected={showWeekPnl} onValueChange={setShowWeekPnl}>
-                    <label className="text-gray-300 font-medium">Show Weekly PnL</label>
-                  </Switch>
+          <div className={`flex flex-col justify-center items-center ${walletAddress != null && (typeof walletAddress !== 'string' || walletAddress.trim() !== '') ? "" : "opacity-25 pointer-events-none"}`}>
+            <Tabs aria-label="widgetConfigs" color="success" variant="light" radius="full">
+              <Tab key="spacing" title="Spacing">
+                <div className="flex justify-center items-center mt-8">
+                  <div className="w-auto border-r-2 border-[#343641] mr-12 pr-12">
+                    <div className="flex justify-left items-center">
+                      <RadioGroup orientation="vertical" color="success" defaultValue="p-8" onValueChange={setWidgetPaddingSize}>
+                        <Radio className="mb-0.5" value="p-4">
+                          <label className="text-gray-300 font-medium">Padding SM</label>
+                        </Radio>
+                        <Radio className="mb-0.5" value="p-6">
+                          <label className="text-gray-300 font-medium">Padding LG</label>
+                        </Radio>
+                        <Radio className="mb-0.5" value="p-8">
+                          <label className="text-gray-300 font-medium">Padding XL</label>
+                        </Radio>
+                        <Radio value="p-10">
+                          <label className="text-gray-300 font-medium">Padding 2XL</label>
+                        </Radio>
+                      </RadioGroup>
+                    </div>
+                  </div>
+                  <div className="w-auto">
+                    <div className="flex justify-left items-center">
+                      <RadioGroup orientation="vertical" color="success" defaultValue="text-sm" onValueChange={setWidgetFontSize}>
+                        <Radio className="mb-0.5" value="text-sm">
+                          <label className="text-gray-300 font-medium">Font Size SM</label>
+                        </Radio>
+                        <Radio className="mb-0.5" value="text-lg">
+                          <label className="text-gray-300 font-medium">Font Size LG</label>
+                        </Radio>
+                        <Radio className="mb-0.5" value="text-xl">
+                          <label className="text-gray-300 font-medium">Font Size XL</label>
+                        </Radio>
+                        <Radio value="text-2xl">
+                          <label className="text-gray-300 font-medium">Font Size 2XL</label>
+                        </Radio>
+                      </RadioGroup>
+                    </div>
+                  </div>
+                </div>             
+              </Tab>
+              <Tab key="colors" title="Colors">
+                <div className="flex justify-center items-center w-auto mt-8">
+                  <ColorPicker id="rbgcp-square-handle" instanceId="rbgcp-square-handle" className="rounded-lg shadow-md" value={backgroundColor} onChange={setBackgroundColor} hidePresets={true} hideInputs={true} hideEyeDrop={true} hideColorGuide={true} hideInputType={true}/>
                 </div>
-              </div>
-              <div className="flex justify-start items-center">
-                {/* Switch to toggle monthly PnL */}
-                <div className="mb-4">
-                  <Switch size="sm" color="success" isSelected={showMonthPnl} onValueChange={setShowMonthPnl}>
-                    <label className="text-gray-300 font-medium">Show Monthly PnL</label>
-                  </Switch>
+              </Tab>
+              <Tab key="logo" title="Logo">
+                <div className="flex flex-col justify-center items-center w-auto mt-8">
+                  <RadioGroup orientation="horizontal" defaultValue="noplat" onValueChange={setPlatSelected}>
+                    <PlatformRadio className="mr-4" color="success" value="noplat">
+                      <Image alt="noplat" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/noplat.png"} priority={false}/>
+                    </PlatformRadio>
+                    <PlatformRadio className="mr-4" color="success" value="photon">
+                      <Image alt="photon" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/photon.png"} priority={false}/>
+                    </PlatformRadio>
+                    <PlatformRadio className="mr-4" color="success" value="bullx">
+                      <Image alt="bullx" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/bullx.png"} priority={false}/>
+                    </PlatformRadio>
+                    <PlatformRadio className="mr-4" color="success" value="nova">
+                      <Image alt="nova" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/nova.png"} priority={false}/>
+                    </PlatformRadio>
+                    <PlatformRadio color="success" value="axiom">
+                      <Image alt="axiom" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/axiom.png"} priority={false}/>
+                    </PlatformRadio>
+                  </RadioGroup>
+                  <Input type="text" label="Logo URL" value={inputLogoURL} onValueChange={setInputLogoURL} className="text-gray-300 mt-8"/>
                 </div>
-              </div>
-              <div className="flex justify-start items-center">
-                {/* Switch to toggle PnL percentages */}
-                <div className="mb-4">
-                  <Switch size="sm" color="success" isSelected={showPercentages} onValueChange={setShowPercentages}>
-                    <label className="text-gray-300 font-medium">Show PnL Percentages</label>
-                  </Switch>
+              </Tab>
+              <Tab key="options" title="Options">
+                <div className="flex justify-center items-center mt-8">
+                  <div className="w-auto">
+                    <div className="flex justify-start items-center">
+                      {/* Switch to toggle weekly PnL */}
+                      <div className="mb-4">
+                        <Switch size="sm" color="success" isSelected={showWeekPnl} onValueChange={setShowWeekPnl}>
+                          <label className="text-gray-300 font-medium">Show Weekly PnL</label>
+                        </Switch>
+                      </div>
+                    </div>
+                    <div className="flex justify-start items-center">
+                      {/* Switch to toggle monthly PnL */}
+                      <div className="mb-4">
+                        <Switch size="sm" color="success" isSelected={showMonthPnl} onValueChange={setShowMonthPnl}>
+                          <label className="text-gray-300 font-medium">Show Monthly PnL</label>
+                        </Switch>
+                      </div>
+                    </div>
+                    <div className="flex justify-start items-center">
+                      {/* Switch to toggle PnL percentages */}
+                      <div className="mb-4">
+                        <Switch size="sm" color="success" isSelected={showPercentages} onValueChange={setShowPercentages}>
+                          <label className="text-gray-300 font-medium">Show PnL Percentages</label>
+                        </Switch>
+                      </div>
+                    </div>
+                    <div className="flex justify-start items-center">
+                      {/* Switch to toggle 2D PnL chart visibility */}
+                      <div className="mb-4">
+                        <Switch size="sm" color="success" isSelected={backChartEnabled} onValueChange={setBackChartEnabled}>
+                          <label className="text-gray-300 font-medium">Show 2D Background Chart</label>
+                        </Switch>
+                      </div>
+                    </div>
+                    <div className="flex justify-start items-center">
+                      {/* Checkbox to background CSS code */}
+                      <div>
+                        <Switch size="sm" color="success" isSelected={showRemoveBackCSS} onValueChange={setRemoveBackCSS}>
+                          <label className="text-gray-300 font-medium">Remove Background CSS Code</label>
+                        </Switch>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex justify-start items-center">
-                {/* Switch to toggle 2D PnL chart visibility */}
-                <div className="mb-4">
-                  <Switch size="sm" color="success" isSelected={backChartEnabled} onValueChange={setBackChartEnabled}>
-                    <label className="text-gray-300 font-medium">Show 2D Background Chart</label>
-                  </Switch>
-                </div>
-              </div>
-              <div className="flex justify-start items-center">
-                {/* Checkbox to background CSS code */}
-                <div>
-                  <Switch size="sm" color="success" isSelected={showRemoveBackCSS} onValueChange={setRemoveBackCSS}>
-                    <label className="text-gray-300 font-medium">Remove Background CSS Code</label>
-                  </Switch>
-                </div>
-              </div>
-            </div>
-            <div className="w-auto border-r-2 border-[#343641] mr-12 pr-12">
-              <ColorPicker id="rbgcp-square-handle" instanceId="rbgcp-square-handle" className="rounded-lg shadow-md" value={backgroundColor} onChange={setBackgroundColor} hidePresets={true} hideInputs={true} hideEyeDrop={true} hideColorGuide={true} hideInputType={true}/>
-            </div>
-            <div className="w-auto">
-              <div className="flex justify-left items-center">
-                <RadioGroup orientation="vertical" defaultValue="noplat" onValueChange={setPlatSelected}>
-                  <PlatformRadio className="mb-4" color="success" value="noplat">
-                    <Image alt="noplat" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/noplat.png"} priority={false}/>
-                  </PlatformRadio>
-                  <PlatformRadio className="mb-4" color="success" value="photon">
-                    <Image alt="photon" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/photon.png"} priority={false}/>
-                  </PlatformRadio>
-                  <PlatformRadio className="mb-4" color="success" value="bullx">
-                    <Image alt="bullx" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/bullx.png"} priority={false}/>
-                  </PlatformRadio>
-                  <PlatformRadio className="mb-4" color="success" value="nova">
-                    <Image alt="nova" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/nova.png"} priority={false}/>
-                  </PlatformRadio>
-                  <PlatformRadio color="success" value="axiom">
-                    <Image alt="axiom" width={"100"} height={"100"} className="w-16 h-16 ml-2 object-contain drop-shadow-md" src={"/axiom.png"} priority={false}/>
-                  </PlatformRadio>
-                  <Input type="text" label="Logo URL" value={inputLogoURL} onValueChange={setInputLogoURL} className="text-gray-300 mt-6"/>
-                </RadioGroup>
-              </div>
-            </div>
+              </Tab>
+            </Tabs>
           </div>
         </div>
       </div>
