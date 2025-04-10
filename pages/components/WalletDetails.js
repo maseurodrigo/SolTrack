@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/router';
 import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 import { motion } from "motion/react";
+import ReactPlayer from 'react-player';
 
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
 import LineChart2D from './charts/LineChart2D.js';
@@ -49,6 +50,7 @@ export default function WalletDetails() {
                             showPercentages: urlJsonData.showPercentages,
                             backChartEnabled: urlJsonData.backChartEnabled,
                             backgroundColor: urlJsonData.backgroundColor?.toLowerCase(),
+                            inputBackgroundVideoURL: urlJsonData.inputBackgroundVideoURL,
                             platSelected: urlJsonData.platSelected?.toLowerCase(),
                             inputLogoURL: urlJsonData.inputLogoURL
                         });
@@ -171,6 +173,20 @@ export default function WalletDetails() {
                                 {walletConfig.backChartEnabled && (
                                     <LineChart2D data={tradeData} />
                                 )}
+                                {(walletConfig.inputBackgroundVideoURL) && (
+                                    <div className="absolute top-0 left-0 flex justify-center items-center content-center blur-md filter brightness-50 contrast-125 saturate-50 pointer-events-none">
+                                        <ReactPlayer
+                                            style={{ position: "absolute", top: 0, left: 0 }}
+                                            className="object-cover"
+                                            url={walletConfig.inputBackgroundVideoURL}
+                                            playing
+                                            loop
+                                            muted
+                                            controls={false}
+                                            config={{ file: { attributes: { autoPlay: true, muted: true, loop: true, playsInline: true } } }}
+                                        />
+                                    </div>
+                                )}
                                 {(walletConfig.inputLogoURL || (walletConfig.platSelected && walletConfig.platSelected !== "noplat")) && (
                                     <motion.div
                                         animate={{
@@ -195,7 +211,7 @@ export default function WalletDetails() {
                                     </div>
                                     <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                                         <NumberFlow value={walletData.currentBalance} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className="drop-shadow-xl"/>
-                                        <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter ml-4 drop-shadow-xl"/>
+                                        <img src="https://assets.crypto.ro/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter ml-4 drop-shadow-xl"/>
                                     </div>
                                 </div>
                                 <div className={`flex flex-col justify-center items-center text-9xl ${walletConfig.widgetPaddingSize} ${parseFloat(walletData?.pnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.pnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'}`}>
@@ -205,7 +221,7 @@ export default function WalletDetails() {
                                     <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                                         <div style={{ '--number-flow-char-height': '0.85em' }} className="flex items-center gap-4 font-semibold">
                                             {parseFloat(walletData?.pnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.pnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className={`${parseFloat(walletData?.pnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.pnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'} drop-shadow-xl`}/>
-                                            <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
+                                            <img src="https://assets.crypto.ro/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
                                         </div>
                                     </div>
                                     {walletConfig.showPercentages && parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.pnl).toFixed(2) && parseFloat(walletData?.pnl).toFixed(2) < 0 && (
@@ -227,7 +243,7 @@ export default function WalletDetails() {
                                         <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                                             <div style={{ '--number-flow-char-height': '0.85em' }} className="flex items-center gap-4 font-semibold">
                                                 {parseFloat(walletData?.weekPnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.weekPnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className={`${parseFloat(walletData?.weekPnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.weekPnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'} drop-shadow-xl`}/>
-                                                <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
+                                                <img src="https://assets.crypto.ro/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
                                             </div>
                                         </div>
                                         {walletConfig.showPercentages && parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.weekPnl).toFixed(2) && parseFloat(walletData?.weekPnl).toFixed(2) < 0 && (
@@ -250,7 +266,7 @@ export default function WalletDetails() {
                                         <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                                             <div style={{ '--number-flow-char-height': '0.85em' }} className="flex items-center gap-4 font-semibold">
                                                 {parseFloat(walletData?.monthPnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.monthPnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className={`${parseFloat(walletData?.monthPnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.monthPnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'} drop-shadow-xl`}/>
-                                                <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
+                                                <img src="https://assets.crypto.ro/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
                                             </div>
                                         </div>
                                         {walletConfig.showPercentages && parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.monthPnl).toFixed(2) && parseFloat(walletData?.monthPnl).toFixed(2) < 0 && (

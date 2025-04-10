@@ -5,6 +5,7 @@ import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 import { motion } from "motion/react";
 import Image from 'next/image';
 import ColorPicker from 'react-best-gradient-color-picker';
+import ReactPlayer from 'react-player';
 
 import RemoveBackCSS from './RemoveBackCSS';
 import AnimatedBorderTrail from './animata/container/animated-border-trail.tsx';
@@ -46,6 +47,7 @@ const WalletTracker = () => {
   const [backChartEnabled, setBackChartEnabled] = useState(true); // State to toggle PnL 2D PnL chart
   const [showRemoveBackCSS, setRemoveBackCSS] = useState(false); // State to toggle background CSS code
   const [backgroundColor, setBackgroundColor] = useState('rgba(31, 32, 41, 1)'); // State to change background widget color
+  const [inputBackgroundVideoURL, setInputBackgroundVideoURL] = useState(""); // State for the background video URL input
   const [platSelected, setPlatSelected] = useState(""); // State to toggle selected platform
   const [inputLogoURL, setInputLogoURL] = useState(""); // State for the logo URL input
   const [currentPath, setCurrentPath] = useState(""); // Get the current URL as a string
@@ -159,7 +161,7 @@ const WalletTracker = () => {
   }, [currentBalance]); // Re-fetch when currentBalance change
 
   useEffect(() => {
-    const walletData = { traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, platSelected, inputLogoURL };
+    const walletData = { traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, inputBackgroundVideoURL, platSelected, inputLogoURL };
 
     // Encrypt the string
     const encryptedURLData = encrypt(process.env.NEXT_PUBLIC_PASSPHRASE, JSON.stringify(walletData, null, 2));
@@ -167,8 +169,8 @@ const WalletTracker = () => {
     // Store URL with the data passed as query params
     setWalletDetails(`${currentPath}components/WalletDetails?encryptedData=${encryptedURLData}`);
 
-    // Re-fetch when traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, platSelected or inputLogoURL change
-  }, [traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, platSelected, inputLogoURL]);
+    // Re-fetch when traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, inputBackgroundVideoURL, platSelected or inputLogoURL change
+  }, [traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, inputBackgroundVideoURL, platSelected, inputLogoURL]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -269,6 +271,7 @@ const WalletTracker = () => {
                 <div className="flex justify-center items-center w-auto mt-8">
                   <ColorPicker id="rbgcp-square-handle" instanceId="rbgcp-square-handle" className="rounded-lg shadow-md" value={backgroundColor} onChange={setBackgroundColor} hidePresets={true} hideInputs={true} hideEyeDrop={true} hideColorGuide={true} hideInputType={true}/>
                 </div>
+                <Input type="text" label="Background Video URL" value={inputBackgroundVideoURL} onValueChange={setInputBackgroundVideoURL} className="text-gray-300 mt-8"/>
               </Tab>
               <Tab key="logo" title="Logo">
                 <div className="flex flex-col justify-center items-center w-auto mt-8">
@@ -377,6 +380,20 @@ const WalletTracker = () => {
           <div className="flex justify-center items-center my-8">
             <AnimatedBorderTrail trailSize="lg" trailColor={parseFloat(walletData?.pnl).toFixed(2) < 0 ? "red" : parseFloat(walletData?.pnl).toFixed(2) > 0 ? "green" : "grey"}>
               <div className="flex justify-center items-center text-white max-w-fit px-4 rounded-lg shadow-2xl" style={{ background: `${backgroundColor}` }}>
+                {(inputBackgroundVideoURL) && (
+                  <div className="absolute top-0 left-0 flex justify-center items-center content-center blur-md filter brightness-50 contrast-125 saturate-50 pointer-events-none">
+                    <ReactPlayer
+                      style={{ position: "absolute", top: 0, left: 0 }}
+                      className="object-cover"
+                      url={inputBackgroundVideoURL}
+                      playing
+                      loop
+                      muted
+                      controls={false}
+                      config={{ file: { attributes: { autoPlay: true, muted: true, loop: true, playsInline: true } } }}
+                    />
+                  </div>
+                )}
                 {(inputLogoURL || (platSelected && platSelected !== "noplat")) && (
                   <motion.div
                     animate={{
@@ -401,7 +418,7 @@ const WalletTracker = () => {
                   </div>
                   <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                     <NumberFlow value={walletData.currentBalance} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className="drop-shadow-xl"/>
-                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter ml-4 drop-shadow-xl"/>
+                    <img src="https://assets.crypto.ro/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter ml-4 drop-shadow-xl"/>
                   </div>
                 </div>
                 <div className={`flex flex-col justify-center items-center text-9xl ${widgetPaddingSize} ${parseFloat(walletData?.pnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.pnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'}`}>
@@ -411,7 +428,7 @@ const WalletTracker = () => {
                   <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                     <div style={{ '--number-flow-char-height': '0.85em' }} className="flex items-center gap-4 font-semibold">
                       {parseFloat(walletData?.pnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.pnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className={`${parseFloat(walletData?.pnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.pnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'} drop-shadow-xl`}/>
-                      <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
+                      <img src="https://assets.crypto.ro/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
                     </div>
                   </div>
                   {showPercentages && parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.pnl).toFixed(2) && parseFloat(walletData?.pnl).toFixed(2) < 0 && (
@@ -433,7 +450,7 @@ const WalletTracker = () => {
                     <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                       <div style={{ '--number-flow-char-height': '0.85em' }} className="flex items-center gap-4 font-semibold">
                         {parseFloat(walletData?.weekPnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.weekPnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className={`${parseFloat(walletData?.weekPnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.weekPnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'} drop-shadow-xl`}/>
-                        <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
+                        <img src="https://assets.crypto.ro/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
                       </div>
                     </div>
                     {showPercentages && parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.weekPnl).toFixed(2) && parseFloat(walletData?.weekPnl).toFixed(2) < 0 && (
@@ -456,7 +473,7 @@ const WalletTracker = () => {
                     <div className="flex justify-center items-center text-4xl font-bold text-shadow">
                       <div style={{ '--number-flow-char-height': '0.85em' }} className="flex items-center gap-4 font-semibold">
                         {parseFloat(walletData?.monthPnl).toFixed(2) > 0 ? "+" : ""}<NumberFlow value={walletData?.monthPnl} trend={0} format={{ notation: "compact", maximumFractionDigits: 2 }} className={`${parseFloat(walletData?.monthPnl).toFixed(2) > 0 ? 'text-emerald-500' : parseFloat(walletData?.monthPnl).toFixed(2) < 0 ? 'text-red-500' : 'text-white'} drop-shadow-xl`}/>
-                        <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
+                        <img src="https://assets.crypto.ro/logos/solana-sol-logo.png" alt="SOL" className="w-6 h-6 filter drop-shadow-xl"/>
                       </div>
                     </div>
                     {showPercentages && parseFloat(walletData?.currentBalance).toFixed(2) !== parseFloat(walletData?.monthPnl).toFixed(2) && parseFloat(walletData?.monthPnl).toFixed(2) < 0 && (
