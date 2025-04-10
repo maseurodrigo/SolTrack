@@ -171,9 +171,6 @@ export default function WalletDetails() {
                     <div className="fixed bottom-0 left-0 w-full flex justify-center items-center mb-12">
                         <AnimatedBorderTrail trailSize="lg" trailColor={parseFloat(walletData?.pnl).toFixed(2) < 0 ? "red" : parseFloat(walletData?.pnl).toFixed(2) > 0 ? "green" : "white"}>
                             <div className="flex justify-center items-center text-white max-w-fit px-4 rounded-lg shadow-2xl" style={{ background: `${walletConfig.backgroundColor}` }}>
-                                {walletConfig.backChartEnabled && (
-                                    <LineChart2D data={tradeData} />
-                                )}
                                 {(walletConfig.inputBackgroundVideoURL) && (
                                     <div className={`absolute top-0 left-0 flex justify-center items-center content-center ${walletConfig.backgroundVideoBlur} filter brightness-50 contrast-125 saturate-50 pointer-events-none`}>
                                         <ReactPlayer
@@ -188,6 +185,7 @@ export default function WalletDetails() {
                                         />
                                     </div>
                                 )}
+                                {walletConfig.backChartEnabled && ( <LineChart2D data={tradeData} /> )}
                                 {(walletConfig.inputLogoURL || (walletConfig.platSelected && walletConfig.platSelected !== "noplat")) && (
                                     <motion.div
                                         animate={{
