@@ -48,6 +48,7 @@ const WalletTracker = () => {
   const [showRemoveBackCSS, setRemoveBackCSS] = useState(false); // State to toggle background CSS code
   const [backgroundColor, setBackgroundColor] = useState('rgba(31, 32, 41, 1)'); // State to change background widget color
   const [inputBackgroundVideoURL, setInputBackgroundVideoURL] = useState(""); // State for the background video URL input
+  const [backgroundVideoBlur, setBackgroundVideoBlur] = useState("blur-md"); // State to set background video blur
   const [platSelected, setPlatSelected] = useState(""); // State to toggle selected platform
   const [inputLogoURL, setInputLogoURL] = useState(""); // State for the logo URL input
   const [currentPath, setCurrentPath] = useState(""); // Get the current URL as a string
@@ -161,7 +162,7 @@ const WalletTracker = () => {
   }, [currentBalance]); // Re-fetch when currentBalance change
 
   useEffect(() => {
-    const walletData = { traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, inputBackgroundVideoURL, platSelected, inputLogoURL };
+    const walletData = { traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, inputBackgroundVideoURL, backgroundVideoBlur, platSelected, inputLogoURL };
 
     // Encrypt the string
     const encryptedURLData = encrypt(process.env.NEXT_PUBLIC_PASSPHRASE, JSON.stringify(walletData, null, 2));
@@ -169,8 +170,8 @@ const WalletTracker = () => {
     // Store URL with the data passed as query params
     setWalletDetails(`${currentPath}components/WalletDetails?encryptedData=${encryptedURLData}`);
 
-    // Re-fetch when traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, inputBackgroundVideoURL, platSelected or inputLogoURL change
-  }, [traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, inputBackgroundVideoURL, platSelected, inputLogoURL]);
+    // Re-fetch when traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, inputBackgroundVideoURL, backgroundVideoBlur, platSelected or inputLogoURL change
+  }, [traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, inputBackgroundVideoURL, backgroundVideoBlur, platSelected, inputLogoURL]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -230,7 +231,7 @@ const WalletTracker = () => {
               <Tab key="spacing" title="Spacing">
                 <div className="flex justify-center items-center mt-8">
                   <div className="w-auto border-r-2 border-[#343641] mr-12 pr-12">
-                    <div className="flex justify-left items-center">
+                    <div className="flex justify-center items-center">
                       <RadioGroup orientation="vertical" color="success" defaultValue="p-8" onValueChange={setWidgetPaddingSize}>
                         <Radio className="mb-0.5" value="p-4">
                           <label className="text-gray-300 font-medium">Padding SM</label>
@@ -248,7 +249,7 @@ const WalletTracker = () => {
                     </div>
                   </div>
                   <div className="w-auto">
-                    <div className="flex justify-left items-center">
+                    <div className="flex justify-center items-center">
                       <RadioGroup orientation="vertical" color="success" defaultValue="text-sm" onValueChange={setWidgetFontSize}>
                         <Radio className="mb-0.5" value="text-sm">
                           <label className="text-gray-300 font-medium">Font Size SM</label>
@@ -265,13 +266,45 @@ const WalletTracker = () => {
                       </RadioGroup>
                     </div>
                   </div>
-                </div>             
+                </div>
               </Tab>
               <Tab key="colors" title="Colors">
                 <div className="flex justify-center items-center w-auto mt-8">
-                  <ColorPicker id="rbgcp-square-handle" instanceId="rbgcp-square-handle" className="rounded-lg shadow-md" value={backgroundColor} onChange={setBackgroundColor} hidePresets={true} hideInputs={true} hideEyeDrop={true} hideColorGuide={true} hideInputType={true}/>
+                  <div className="w-auto border-r-2 border-[#343641] mr-12 pr-12">
+                    <div className="flex justify-center items-center">
+                      <ColorPicker id="rbgcp-square-handle" instanceId="rbgcp-square-handle" className="rounded-lg shadow-md" value={backgroundColor} onChange={setBackgroundColor} hidePresets={true} hideInputs={true} hideEyeDrop={true} hideColorGuide={true} hideInputType={true}/>
+                    </div>
+                  </div>
+                  <div className="w-auto">
+                    <div className="flex justify-center items-center">
+                      <Input type="text" label="Background Video URL" value={inputBackgroundVideoURL} onValueChange={setInputBackgroundVideoURL} className="text-gray-300 mt-8"/>
+                    </div>
+                    <div className="flex justify-center items-center w-auto mt-8">
+                      <RadioGroup orientation="vertical" color="success" defaultValue="blur-md" onValueChange={setBackgroundVideoBlur}>
+                        <div className="grid grid-cols-2 gap-x-12 gap-y-2">
+                          <Radio className="mb-0.5" value="blur-xs">
+                            <label className="text-gray-300 font-medium">Blur XS</label>
+                          </Radio>
+                          <Radio className="mb-0.5" value="blur-lg">
+                            <label className="text-gray-300 font-medium">Blur LG</label>
+                          </Radio>
+                          <Radio className="mb-0.5" value="blur-sm">
+                            <label className="text-gray-300 font-medium">Blur SM</label>
+                          </Radio>
+                          <Radio className="mb-0.5" value="blur-xl">
+                            <label className="text-gray-300 font-medium">Blur XL</label>
+                          </Radio>
+                          <Radio className="mb-0.5" value="blur-md">
+                            <label className="text-gray-300 font-medium">Blur MD</label>
+                          </Radio>
+                          <Radio value="blur-2xl">
+                            <label className="text-gray-300 font-medium">Blur 2XL</label>
+                          </Radio>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                  </div>
                 </div>
-                <Input type="text" label="Background Video URL" value={inputBackgroundVideoURL} onValueChange={setInputBackgroundVideoURL} className="text-gray-300 mt-8"/>
               </Tab>
               <Tab key="logo" title="Logo">
                 <div className="flex flex-col justify-center items-center w-auto mt-8">
@@ -381,7 +414,7 @@ const WalletTracker = () => {
             <AnimatedBorderTrail trailSize="lg" trailColor={parseFloat(walletData?.pnl).toFixed(2) < 0 ? "red" : parseFloat(walletData?.pnl).toFixed(2) > 0 ? "green" : "grey"}>
               <div className="flex justify-center items-center text-white max-w-fit px-4 rounded-lg shadow-2xl" style={{ background: `${backgroundColor}` }}>
                 {(inputBackgroundVideoURL) && (
-                  <div className="absolute top-0 left-0 flex justify-center items-center content-center blur-md filter brightness-50 contrast-125 saturate-50 pointer-events-none">
+                  <div className={`absolute top-0 left-0 flex justify-center items-center content-center ${backgroundVideoBlur} filter brightness-50 contrast-125 saturate-50 pointer-events-none`}>
                     <ReactPlayer
                       style={{ position: "absolute", top: 0, left: 0 }}
                       className="object-cover"

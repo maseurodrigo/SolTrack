@@ -51,6 +51,7 @@ export default function WalletDetails() {
                             backChartEnabled: urlJsonData.backChartEnabled,
                             backgroundColor: urlJsonData.backgroundColor?.toLowerCase(),
                             inputBackgroundVideoURL: urlJsonData.inputBackgroundVideoURL,
+                            backgroundVideoBlur: urlJsonData.backgroundVideoBlur?.toLowerCase(),
                             platSelected: urlJsonData.platSelected?.toLowerCase(),
                             inputLogoURL: urlJsonData.inputLogoURL
                         });
@@ -174,7 +175,7 @@ export default function WalletDetails() {
                                     <LineChart2D data={tradeData} />
                                 )}
                                 {(walletConfig.inputBackgroundVideoURL) && (
-                                    <div className="absolute top-0 left-0 flex justify-center items-center content-center blur-md filter brightness-50 contrast-125 saturate-50 pointer-events-none">
+                                    <div className={`absolute top-0 left-0 flex justify-center items-center content-center ${walletConfig.backgroundVideoBlur} filter brightness-50 contrast-125 saturate-50 pointer-events-none`}>
                                         <ReactPlayer
                                             style={{ position: "absolute", top: 0, left: 0 }}
                                             className="object-cover"
