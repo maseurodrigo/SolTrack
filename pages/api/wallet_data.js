@@ -75,12 +75,17 @@ export default async function handler(req, res) {
     data.startingDate = now.toDateString();
     data.startingBalance = localBalance;
   }
+
+  // Removes the time component (hours, minutes, seconds) from a Date object
+  function normalizeDate(date) { return new Date(date.getFullYear(), date.getMonth(), date.getDate()); }
   
   // Recalculate weekly and monthly PnL if the date changes
   const startOfWeek = new Date(now.setDate(now.getDate() - ((now.getDay() + 6) % 7)));
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  
-  if (!data.weekStartDate || data.weekStartDate.toDateString() !== startOfWeek.toDateString()) {
+  const dataWeekStart = data.weekStartDate ? normalizeDate(new Date(data.weekStartDate)) : null;
+  const normalizedStartOfWeek = normalizeDate(startOfWeek);
+
+  if (!dataWeekStart || dataWeekStart.getTime() !== normalizedStartOfWeek.getTime()) {
     data.weekStartDate = startOfWeek;
     data.weekStartBalance = localBalance;
 
