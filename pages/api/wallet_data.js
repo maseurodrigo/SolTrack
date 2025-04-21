@@ -85,11 +85,11 @@ export default async function handler(req, res) {
   const dataWeekStart = data.weekStartDate ? normalizeDate(new Date(data.weekStartDate)) : null;
   
   if (!dataWeekStart || dataWeekStart.getTime() !== normalizeDate(startOfWeek).getTime()) {
-    data.weekStartDate = startOfWeek;
+    data.weekStartDate = normalizeDate(startOfWeek).getTime();
     data.weekStartBalance = localBalance;
 
     // Update the week start date and balance in the database
-    await updtWalletFuncs.checkDbAndUpdateWeek(wallet, startOfWeek, localBalance, startOfMonth, localBalance);
+    await updtWalletFuncs.checkDbAndUpdateWeek(wallet, normalizeDate(startOfWeek).getTime(), localBalance, startOfMonth, localBalance);
   }
 
   if (!data.monthStartDate || data.monthStartDate.toDateString() !== startOfMonth.toDateString()) {
@@ -97,7 +97,7 @@ export default async function handler(req, res) {
     data.monthStartBalance = localBalance;
 
     // Update the month start date and balance in the database
-    await updtWalletFuncs.checkDbAndUpdateMonth(wallet, startOfWeek, localBalance, startOfMonth, localBalance);
+    await updtWalletFuncs.checkDbAndUpdateMonth(wallet, normalizeDate(startOfWeek).getTime(), localBalance, startOfMonth, localBalance);
   }
 
   const pnl = +(localBalance - data.startingBalance).toFixed(2);
