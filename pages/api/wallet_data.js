@@ -6,7 +6,7 @@ import updtWalletFuncs from './db/UpdateWallet';
 let userData = {};
 
 export default async function handler(req, res) {
-  const { wallet, currentBalance } = req.query;
+  const { wallet, currentBalance, resetPNL } = req.query;
   let localBalance = currentBalance === 'null' ? undefined : parseFloat(currentBalance);
   
   if (!wallet || !isValidSolanaAddress(wallet)) {
@@ -68,6 +68,10 @@ export default async function handler(req, res) {
   if (isNaN(localBalance)) { localBalance = await getSolanaBalance(wallet); }
 
   const data = userData[wallet];
+  
+  // Reset PnL to zero if flag is set
+  if(resetPNL) { data.startingBalance = localBalance; }
+
   const now = new Date();
 
   // Update daily PnL

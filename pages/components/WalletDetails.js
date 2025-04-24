@@ -49,6 +49,7 @@ export default function WalletDetails() {
                             showMonthPnl: urlJsonData.showMonthPnl, 
                             showPercentages: urlJsonData.showPercentages,
                             backChartEnabled: urlJsonData.backChartEnabled,
+                            resetPnL: urlJsonData.resetPnL,
                             backgroundColor: urlJsonData.backgroundColor?.toLowerCase(),
                             inputBackgroundVideoURL: urlJsonData.inputBackgroundVideoURL,
                             backgroundVideoBlur: urlJsonData.backgroundVideoBlur?.toLowerCase(),
@@ -86,7 +87,7 @@ export default function WalletDetails() {
             const fetchHttpData = async () => {
                 try {
                     // Send a request with wallet address and current balance as query parameters
-                    const response = await fetch(`/api/wallet_data?wallet=${locWalletAddress}&currentBalance=${null}`);
+                    const response = await fetch(`/api/wallet_data?wallet=${locWalletAddress}&currentBalance=${null}&resetPNL=${walletConfig.resetPnL}`);
 
                     // If response is not okay, parse the error response
                     if (!response.ok) {
@@ -121,7 +122,7 @@ export default function WalletDetails() {
             const fetchData = async () => {
                 try {
                     // Send a request with wallet address and current balance as query parameters
-                    const response = await fetch(`/api/wallet_data?wallet=${locWalletAddress}&currentBalance=${currentBalance}`);
+                    const response = await fetch(`/api/wallet_data?wallet=${locWalletAddress}&currentBalance=${currentBalance}&resetPNL=${false}`);
 
                     // If response is not okay, parse the error response
                     if (!response.ok) {

@@ -46,6 +46,7 @@ const WalletTracker = () => {
   const [showPercentages, setShowPercentages] = useState(true); // State to toggle PnL percentages
   const [backChartEnabled, setBackChartEnabled] = useState(true); // State to toggle PnL 2D PnL chart
   const [showRemoveBackCSS, setRemoveBackCSS] = useState(false); // State to toggle background CSS code
+  const [resetPnL, setResetPnL] = useState(false); // State to reset PnL
   const [backgroundColor, setBackgroundColor] = useState('rgba(31, 32, 41, 1)'); // State to change background widget color
   const [inputBackgroundVideoURL, setInputBackgroundVideoURL] = useState(""); // State for the background video URL input
   const [backgroundVideoBlur, setBackgroundVideoBlur] = useState("blur-md"); // State to set background video blur
@@ -65,13 +66,13 @@ const WalletTracker = () => {
   // Set up the HTTP interval
   let httpInterval = null;
 
-  const fetchHttpData = async () => {
+  const fetchHttpData = async (resPNL) => {
     try {
       // If theres a valid wallet address proceed
       if (walletAddress != null && (typeof walletAddress !== 'string' || walletAddress.trim() !== ''))
       {
         // Send a request with wallet address and current balance as query parameters
-        const response = await fetch(`/api/wallet_data?wallet=${walletAddress}&currentBalance=${null}`);
+        const response = await fetch(`/api/wallet_data?wallet=${walletAddress}&currentBalance=${null}&resetPNL=${resPNL}`);
 
         // If response is not okay, parse the error response
         if (!response.ok) {
@@ -116,11 +117,11 @@ const WalletTracker = () => {
     shownErrors.clear();
 
     // Fetch data when walletAddress changes
-    if (walletAddress) { fetchHttpData(); }
+    if (walletAddress) { fetchHttpData(false); }
 
     if (traderType === "http") {
       // Set up an interval to fetch HTTP data every 5 seconds
-      httpInterval = setInterval(() => { fetchHttpData(); }, 5000);
+      httpInterval = setInterval(() => { fetchHttpData(false); }, 5000);
 
       // Cleanup the interval when the component is unmounted or dependencies change
       return () => clearInterval(httpInterval);
@@ -133,7 +134,7 @@ const WalletTracker = () => {
       const fetchData = async () => {
         try {
           // Send a request with wallet address and current balance as query parameters
-          const response = await fetch(`/api/wallet_data?wallet=${walletAddress}&currentBalance=${currentBalance}`);
+          const response = await fetch(`/api/wallet_data?wallet=${walletAddress}&currentBalance=${currentBalance}&resetPNL=${false}`);
           
           // If response is not okay, parse the error response
           if (!response.ok) {
@@ -162,7 +163,13 @@ const WalletTracker = () => {
   }, [currentBalance]); // Re-fetch when currentBalance change
 
   useEffect(() => {
-    const walletData = { traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, inputBackgroundVideoURL, backgroundVideoBlur, platSelected, inputLogoURL };
+
+    // Fetch data when walletAddress changes
+    if (walletAddress) { fetchHttpData(resetPnL); }
+  }, [resetPnL]); // Re-fetch when resetPnL change
+
+  useEffect(() => {
+    const walletData = { traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, resetPnL, backgroundColor, inputBackgroundVideoURL, backgroundVideoBlur, platSelected, inputLogoURL };
 
     // Encrypt the string
     const encryptedURLData = encrypt(process.env.NEXT_PUBLIC_PASSPHRASE, JSON.stringify(walletData, null, 2));
@@ -170,8 +177,8 @@ const WalletTracker = () => {
     // Store URL with the data passed as query params
     setWalletDetails(`${currentPath}components/WalletDetails?encryptedData=${encryptedURLData}`);
 
-    // Re-fetch when traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, inputBackgroundVideoURL, backgroundVideoBlur, platSelected or inputLogoURL change
-  }, [traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, backgroundColor, inputBackgroundVideoURL, backgroundVideoBlur, platSelected, inputLogoURL]);
+    // Re-fetch when traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, resetPnL, backgroundColor, inputBackgroundVideoURL, backgroundVideoBlur, platSelected or inputLogoURL change
+  }, [traderType, walletAddress, widgetPaddingSize, widgetFontSize, showWeekPnl, showMonthPnl, showPercentages, backChartEnabled, resetPnL, backgroundColor, inputBackgroundVideoURL, backgroundVideoBlur, platSelected, inputLogoURL]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -365,9 +372,17 @@ const WalletTracker = () => {
                     </div>
                     <div className="flex justify-start items-center">
                       {/* Checkbox to background CSS code */}
-                      <div>
+                      <div className="mb-4">
                         <Switch size="sm" color="success" isSelected={showRemoveBackCSS} onValueChange={setRemoveBackCSS}>
                           <label className="text-gray-300 font-medium">Remove Background CSS Code</label>
+                        </Switch>
+                      </div>
+                    </div>
+                    <div className="flex justify-start items-center">
+                      {/* Checkbox to reset today's pnl */}
+                      <div>
+                        <Switch size="sm" color="success" isSelected={resetPnL} onValueChange={setResetPnL}>
+                          <label className="text-gray-300 font-medium">Reset Today's PnL</label>
                         </Switch>
                       </div>
                     </div>
