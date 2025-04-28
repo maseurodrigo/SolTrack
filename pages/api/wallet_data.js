@@ -68,10 +68,10 @@ export default async function handler(req, res) {
   if (isNaN(localBalance)) { localBalance = await getSolanaBalance(wallet); }
 
   const data = userData[wallet];
-  
-  // Reset PnL to zero if flag is set
-  if(resetPNL) { data.startingBalance = localBalance; }
 
+  // Reset PnL to zero if option is active
+  if(resetPNL === 'true') { data.startingBalance = localBalance; }
+  
   const now = new Date();
 
   // Update daily PnL
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
     data.weekStartBalance = localBalance;
 
     // Update the week start date and balance in the database
-    await updtWalletFuncs.checkDbAndUpdateWeek(wallet, normalizeDate(startOfWeek).getTime(), localBalance, startOfMonth, localBalance);
+    await updtWalletFuncs.checkDbAndUpdateWeek(wallet, startOfWeek, localBalance, startOfMonth, localBalance);
   }
 
   if (!data.monthStartDate || data.monthStartDate.toDateString() !== startOfMonth.toDateString()) {
@@ -101,9 +101,9 @@ export default async function handler(req, res) {
     data.monthStartBalance = localBalance;
 
     // Update the month start date and balance in the database
-    await updtWalletFuncs.checkDbAndUpdateMonth(wallet, normalizeDate(startOfWeek).getTime(), localBalance, startOfMonth, localBalance);
+    await updtWalletFuncs.checkDbAndUpdateMonth(wallet, startOfWeek, localBalance, startOfMonth, localBalance);
   }
-
+  
   const pnl = +(localBalance - data.startingBalance).toFixed(2);
   const weekPnl = +(localBalance - data.weekStartBalance).toFixed(2);
   const monthPnl = +(localBalance - data.monthStartBalance).toFixed(2);
